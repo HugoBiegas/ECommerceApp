@@ -8,8 +8,6 @@
 
   <ItemGroup>
     <Folder Include="Data\" />
-    <Folder Include="Services\" />
-    <Folder Include="TagHelpers\" />
   </ItemGroup>
 
 </Project>

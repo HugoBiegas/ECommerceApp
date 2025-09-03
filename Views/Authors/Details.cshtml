@@ -1,0 +1,116 @@
+﻿@* Authors/Details.cshtml *@
+@model Author
+@{
+    ViewData["Title"] = Model.Name;
+}
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="mb-4">
+                    <i class="fas fa-user-circle fa-5x text-primary"></i>
+                </div>
+                <h3 class="card-title">@Model.Name</h3>
+                @if (!string.IsNullOrEmpty(Model.Nationality))
+                {
+                    <p class="text-muted">
+                        <i class="fas fa-globe me-2"></i>@Model.Nationality
+                    </p>
+                }
+                @if (Model.BirthDate.HasValue)
+                {
+                    <p class="text-muted">
+                        <i class="fas fa-birthday-cake me-2"></i>
+                        Né(e) le @Model.BirthDate.Value.ToString("dd MMMM yyyy")
+                        <br />
+                        <small>(@Model.Age ans)</small>
+                    </p>
+                }
+                <div class="mt-4" asp-role="@UserRole.Librarian">
+                    <div class="d-grid gap-2">
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
+                            <i class="fas fa-edit me-2"></i>Modifier
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger">
+                            <i class="fas fa-trash me-2"></i>Supprimer
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <!-- Biographie -->
+        @if (!string.IsNullOrEmpty(Model.Biography))
+        {
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-quote-left me-2"></i>Biographie
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">@Model.Biography</p>
+                </div>
+            </div>
+        }
+
+        <!-- Livres de l'auteur -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-book me-2"></i>
+                    Livres de @Model.Name (@ViewBag.AuthorBooks.Count)
+                </h5>
+            </div>
+            <div class="card-body">
+                @if (ViewBag.AuthorBooks != null && ((List<Book>)ViewBag.AuthorBooks).Any())
+                {
+                    <div class="row">
+                        @foreach (Book book in ViewBag.AuthorBooks)
+                        {
+                            <div class="col-md-6 mb-3">
+                                <div class="card">
+                                    <div class="row g-0">
+                                        <div class="col-4">
+                                            <img src="@(book.ImageUrl ?? "/images/book-placeholder.jpg")"
+                                                 class="img-fluid rounded-start" alt="@book.Title"
+                                                 style="height: 120px; object-fit: cover;" />
+                                        </div>
+                                        <div class="col-8">
+                                            <div class="card-body p-3">
+                                                <h6 class="card-title">@book.Title</h6>
+                                                <category-badge category="@book.Category"></category-badge>
+                                                <div class="mt-2">
+                                                    <price-display price="@book.Price" size="small"></price-display>
+                                                    <a asp-controller="Books" asp-action="Details" asp-route-id="@book.Id"
+                                                       class="btn btn-sm btn-outline-primary ms-2">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-4">
+                        <i class="fas fa-book-open fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Aucun livre de cet auteur dans notre catalogue pour le moment.</p>
+                        <div asp-role="@UserRole.Librarian">
+                            <a asp-controller="Books" asp-action="Create" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Ajouter un livre
+                            </a>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

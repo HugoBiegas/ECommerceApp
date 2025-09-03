@@ -1,8 +1,219 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model List<Book>
+@{
+    ViewData["Title"] = "Accueil";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<!-- Hero Section -->
+<div class="hero-section bg-primary text-white py-5 mb-5 rounded">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">
+                    <i class="fas fa-book-open me-3"></i>
+                    Bienvenue chez BookStore
+                </h1>
+                <p class="lead mb-4">
+                    Découvrez notre collection exceptionnelle de livres dans tous les genres.
+                    Des classiques aux dernières nouveautés, trouvez votre prochaine lecture préférée.
+                </p>
+                <div class="d-flex gap-3">
+                    <a asp-controller="Books" asp-action="Index" class="btn btn-light btn-lg">
+                        <i class="fas fa-search me-2"></i>Parcourir le catalogue
+                    </a>
+                    @if (ViewBag.IsLoggedIn != true)
+                    {
+                        <a asp-controller="Account" asp-action="Register" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Rejoindre maintenant
+                        </a>
+                    }
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <i class="fas fa-book-reader" style="font-size: 8rem; opacity: 0.3;"></i>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Stats Section -->
+@if (ViewBag.IsLoggedIn == true)
+{
+    <div class="row mb-5">
+        <div class="col-md-3">
+            <div class="card bg-primary text-white h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-coins fa-2x mb-3"></i>
+                    <h5 class="card-title">Vos Crédits</h5>
+                    <h3 class="mb-0">@ViewBag.UserCredits€</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-success text-white h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-shopping-cart fa-2x mb-3"></i>
+                    <h5 class="card-title">Panier</h5>
+                    <h3 class="mb-0">@(ViewBag.CartItemsCount ?? 0)</h3>
+                    <small>article(s)</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-info text-white h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-book fa-2x mb-3"></i>
+                    <h5 class="card-title">Livres disponibles</h5>
+                    <h3 class="mb-0">@Model.Count()</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card bg-warning text-dark h-100">
+                <div class="card-body text-center">
+                    <i class="fas fa-user fa-2x mb-3"></i>
+                    <h5 class="card-title">Votre Statut</h5>
+                    <div class="mt-2">
+                        @if (ViewBag.UserRole != null)
+                        {
+                            <role-badge role="@Enum.Parse<UserRole>(ViewBag.UserRole.ToString())"></role-badge>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Featured Books Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="section-title">
+                <i class="fas fa-star text-warning me-2"></i>
+                Livres à la Une
+            </h2>
+            <a asp-controller="Books" asp-action="Index" class="btn btn-outline-primary">
+                Voir tout le catalogue <i class="fas fa-arrow-right ms-1"></i>
+            </a>
+        </div>
+
+        @if (Model.Any())
+        {
+            <div class="row" id="featured-books">
+                @foreach (var book in Model.Take(8))
+                {
+                    <book-card book="@book"
+                               show-manage-buttons="@(ViewBag.UserRole?.ToString() == UserRole.Librarian.ToString() || ViewBag.UserRole?.ToString() == UserRole.Admin.ToString())"
+                               show-add-to-cart="@(ViewBag.IsLoggedIn == true)">
+                    </book-card>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-book fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">Aucun livre disponible pour le moment</h4>
+                <p class="text-muted">Revenez bientôt pour découvrir nos nouveautés !</p>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="text-center mb-5">
+            <i class="fas fa-gem text-primary me-2"></i>
+            Pourquoi choisir BookStore ?
+        </h2>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center p-4">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-shipping-fast fa-3x text-primary"></i>
+                </div>
+                <h5 class="card-title">Livraison Rapide</h5>
+                <p class="card-text text-muted">
+                    Commandez aujourd'hui et recevez vos livres dans les plus brefs délais.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center p-4">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-award fa-3x text-success"></i>
+                </div>
+                <h5 class="card-title">Qualité Garantie</h5>
+                <p class="card-text text-muted">
+                    Tous nos livres sont soigneusement sélectionnés pour leur qualité exceptionnelle.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body text-center p-4">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-headset fa-3x text-info"></i>
+                </div>
+                <h5 class="card-title">Support 24/7</h5>
+                <p class="card-text text-muted">
+                    Notre équipe de support est disponible pour vous aider à tout moment.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Call to Action -->
+@if (ViewBag.IsLoggedIn != true)
+{
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-gradient-primary text-white">
+                <div class="card-body text-center py-5">
+                    <h3 class="card-title mb-4">
+                        <i class="fas fa-gift me-2"></i>
+                        Rejoignez BookStore dès aujourd'hui !
+                    </h3>
+                    <p class="card-text lead mb-4">
+                        Inscrivez-vous maintenant et recevez <strong>100€ de crédits gratuits</strong>
+                        pour commencer vos achats immédiatement.
+                    </p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a asp-controller="Account" asp-action="Register" class="btn btn-light btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Créer un compte
+                        </a>
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                <h5 class="alert-heading">
+                    <i class="fas fa-shopping-cart me-2"></i>
+                    Prêt à faire du shopping ?
+                </h5>
+                <p class="mb-3">Vous avez <strong>@ViewBag.UserCredits€</strong> de crédits disponibles.</p>
+                <a asp-controller="Books" asp-action="Index" class="btn btn-primary">
+                    <i class="fas fa-search me-2"></i>Parcourir le catalogue
+                </a>
+            </div>
+        </div>
+    </div>
+}

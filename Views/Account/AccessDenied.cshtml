@@ -1,0 +1,23 @@
+﻿@* Account/AccessDenied.cshtml *@
+@{
+    ViewData["Title"] = "Accès refusé";
+}
+
+<div class="text-center py-5">
+    <div class="mb-4">
+        <i class="fas fa-lock fa-4x text-danger"></i>
+    </div>
+    <h1 class="display-4 text-danger">Accès Refusé</h1>
+    <p class="lead text-muted">
+        Vous n'avez pas les permissions nécessaires pour accéder à cette page.
+    </p>
+    <hr class="my-4">
+    <div class="d-flex justify-content-center gap-3">
+        <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
+            <i class="fas fa-home me-2"></i>Retour à l'accueil
+        </a>
+        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-secondary">
+            <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+        </a>
+    </div>
+</div>

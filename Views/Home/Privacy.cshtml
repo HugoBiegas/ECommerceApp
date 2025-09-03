@@ -1,6 +1,99 @@
-﻿@{
-    ViewData["Title"] = "Privacy Policy";
+﻿@* Home/Privacy.cshtml *@
+@{
+    ViewData["Title"] = "Politique de Confidentialité";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h1 class="mb-0">
+                    <i class="fas fa-shield-alt me-3"></i>
+                    Politique de Confidentialité
+                </h1>
+                <p class="mb-0 mt-2">Dernière mise à jour : 3 septembre 2025</p>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Note :</strong> Cette application est un projet éducatif développé dans le cadre du cours de
+                    Prof. Marcel Stefan Wagner, PhD. Aucune donnée réelle n'est collectée.
+                </div>
+
+                <h3><i class="fas fa-database me-2"></i>Collecte des Données</h3>
+                <p>
+                    Dans le cadre de ce projet de démonstration, nous collectons uniquement les informations
+                    nécessaires au fonctionnement de l'application :
+                </p>
+                <ul>
+                    <li>Informations de compte (nom d'utilisateur, email, nom/prénom)</li>
+                    <li>Données de navigation et d'utilisation de l'application</li>
+                    <li>Informations de commande (pour la simulation d'achats)</li>
+                </ul>
+
+                <h3><i class="fas fa-lock me-2"></i>Protection des Données</h3>
+                <p>
+                    Toutes les données sont stockées temporairement en mémoire et ne persistent pas au-delà
+                    de la session d'utilisation de l'application. Aucune donnée n'est transmise à des tiers.
+                </p>
+
+                <h3><i class="fas fa-cookie-bite me-2"></i>Cookies et Sessions</h3>
+                <p>
+                    L'application utilise des cookies de session pour :
+                </p>
+                <ul>
+                    <li>Maintenir votre connexion pendant votre visite</li>
+                    <li>Mémoriser le contenu de votre panier</li>
+                    <li>Assurer la sécurité des formulaires (protection CSRF)</li>
+                </ul>
+
+                <h3><i class="fas fa-user-shield me-2"></i>Vos Droits</h3>
+                <p>
+                    En tant qu'utilisateur de cette application de démonstration, vous pouvez :
+                </p>
+                <ul>
+                    <li>Modifier vos informations personnelles via votre profil</li>
+                    <li>Demander la suppression de votre compte</li>
+                    <li>Consulter l'historique de vos actions dans l'application</li>
+                </ul>
+
+                <h3><i class="fas fa-code me-2"></i>Nature Éducative du Projet</h3>
+                <div class="alert alert-success">
+                    <i class="fas fa-graduation-cap me-2"></i>
+                    Ce projet a été développé à des fins pédagogiques dans le cadre du cours
+                    <strong>"Retail (e-commerce)"</strong> dispensé par <strong>Prof. Marcel Stefan Wagner, PhD</strong>.
+                    <br /><br />
+                    <strong>Technologies utilisées :</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>ASP.NET Core MVC 8.0</li>
+                        <li>C# avec Razor Pages</li>
+                        <li>Bootstrap 5 pour le design</li>
+                        <li>Tag Helpers personnalisés</li>
+                        <li>Architecture SOLID avec Services Layer</li>
+                    </ul>
+                </div>
+
+                <h3><i class="fas fa-envelope me-2"></i>Contact</h3>
+                <p>
+                    Pour toute question concernant cette politique de confidentialité ou l'application en général :
+                </p>
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <p class="mb-2">
+                            <i class="fas fa-university me-2"></i>
+                            <strong>Institution :</strong> ESTIAM
+                        </p>
+                        <p class="mb-2">
+                            <i class="fas fa-user-tie me-2"></i>
+                            <strong>Professeur :</strong> Marcel Stefan Wagner, PhD
+                        </p>
+                        <p class="mb-0">
+                            <i class="fas fa-laptop-code me-2"></i>
+                            <strong>Projet :</strong> Application E-Commerce ASP.NET Core MVC
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

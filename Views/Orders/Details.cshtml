@@ -1,0 +1,203 @@
+﻿@* Orders/Details.cshtml *@
+@model Order
+@{
+    ViewData["Title"] = "Commande #" + Model.Id;
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-receipt me-2"></i>
+                    Commande #@Model.Id
+                </h4>
+                <order-status status="@Model.Status"></order-status>
+            </div>
+            <div class="card-body">
+                <!-- Informations de la commande -->
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-calendar me-2"></i>Date de commande</h6>
+                        <p>@Model.OrderDate.ToString("dd MMMM yyyy à HH:mm")</p>
+
+                        <h6><i class="fas fa-user me-2"></i>Client</h6>
+                        <p>@Model.CustomerName</p>
+
+                        <h6><i class="fas fa-envelope me-2"></i>Email</h6>
+                        <p>@Model.CustomerEmail</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-euro-sign me-2"></i>Montant total</h6>
+                        <price-display price="@Model.TotalAmount" size="large"></price-display>
+
+                        <h6 class="mt-3"><i class="fas fa-boxes me-2"></i>Nombre d'articles</h6>
+                        <p>@Model.TotalItems article(s)</p>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrEmpty(Model.Notes))
+                {
+                    <div class="alert alert-info">
+                        <h6><i class="fas fa-sticky-note me-2"></i>Notes de commande</h6>
+                        <p class="mb-0">@Model.Notes</p>
+                    </div>
+                }
+
+                <!-- Articles commandés -->
+                <h5 class="mb-3">
+                    <i class="fas fa-list me-2"></i>Articles commandés
+                </h5>
+
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Livre</th>
+                                <th>Prix unitaire</th>
+                                <th>Quantité</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in Model.Items)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>@item.BookTitle</strong>
+                                        <br />
+                                        <small class="text-muted">ID: @item.BookId</small>
+                                    </td>
+                                    <td>@item.UnitPrice.ToString("C")</td>
+                                    <td>
+                                        <span class="badge bg-secondary">@item.Quantity</span>
+                                    </td>
+                                    <td class="fw-bold text-primary">@item.TotalPrice.ToString("C")</td>
+                                </tr>
+                            }
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-primary">
+                                <th colspan="3">Total de la commande</th>
+                                <th class="text-primary">@Model.TotalAmount.ToString("C")</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+
+                <!-- Actions sur la commande -->
+                <div class="mt-4 d-flex gap-2">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Retour aux commandes
+                    </a>
+
+                    @if (Model.Status == OrderStatus.Pending || Model.Status == OrderStatus.Processing)
+                    {
+                        <form method="post" asp-action="Cancel" asp-route-orderId="@Model.Id" class="d-inline">
+                            <button type="submit" class="btn btn-outline-danger"
+                                    onclick="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?')">
+                                <i class="fas fa-ban me-2"></i>Annuler la commande
+                            </button>
+                        </form>
+                    }
+                </div>
+
+                <!-- Gestion du statut (Libraires/Admins) -->
+                @if (ViewBag.CanManageOrders == true && Model.Status != OrderStatus.Cancelled)
+                {
+                    <hr />
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h6><i class="fas fa-cog me-2"></i>Gestion de la commande</h6>
+                            <form method="post" asp-action="UpdateStatus" class="d-flex gap-2 align-items-end">
+                                <input type="hidden" name="orderId" value="@Model.Id" />
+                                <div class="flex-grow-1">
+                                    <label for="status" class="form-label">Nouveau statut</label>
+                                    <select name="status" class="form-select">
+                                        @foreach (var status in ViewBag.OrderStatuses)
+                                        {
+                                            @if (status.Value != (int)OrderStatus.Cancelled)
+                                            {
+                                                <option value="@status.Value" selected="@(status.Value == (int)Model.Status)">@status.Text</option>
+                                            }
+                                        }
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-2"></i>Mettre à jour
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Informations complémentaires -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>Informations
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <h6>Suivi de livraison</h6>
+                    <div class="progress mb-2">
+                        @{
+                            var progressValue = Model.Status switch
+                            {
+                                OrderStatus.Pending => 25,
+                                OrderStatus.Processing => 50,
+                                OrderStatus.Shipped => 75,
+                                OrderStatus.Delivered => 100,
+                                OrderStatus.Cancelled => 0,
+                                _ => 0
+                            };
+                        }
+                        <div class="progress-bar bg-@(Model.Status == OrderStatus.Cancelled ? "danger" : "primary")"
+                             style="width: @progressValue%"></div>
+                    </div>
+                    <small class="text-muted">
+                        @Model.Status switch
+                        {
+                        OrderStatus.Pending => "Commande en attente de traitement",
+                        OrderStatus.Processing => "Commande en cours de préparation",
+                        OrderStatus.Shipped => "Commande expédiée",
+                        OrderStatus.Delivered => "Commande livrée",
+                        OrderStatus.Cancelled => "Commande annulée",
+                        _ => "Statut inconnu"
+                        }
+                    </small>
+                </div>
+
+                @if (Model.Status == OrderStatus.Delivered)
+                {
+                    <div class="alert alert-success">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Commande livrée avec succès !
+                    </div>
+                }
+                else if (Model.Status == OrderStatus.Cancelled)
+                {
+                    <div class="alert alert-danger">
+                        <i class="fas fa-times-circle me-2"></i>
+                        Commande annulée. Les crédits ont été remboursés.
+                    </div>
+                }
+
+                <div class="mt-4">
+                    <h6>Besoin d'aide ?</h6>
+                    <p class="small text-muted mb-2">
+                        Contactez notre service client pour toute question concernant votre commande.
+                    </p>
+                    <button type="button" class="btn btn-outline-info btn-sm w-100">
+                        <i class="fas fa-headset me-2"></i>Contacter le support
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

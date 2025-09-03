@@ -1,0 +1,199 @@
+﻿@* Cart/Checkout.cshtml *@
+@model CheckoutViewModel
+@{
+    ViewData["Title"] = "Finaliser ma commande";
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-credit-card me-2"></i>
+                    Finaliser ma commande
+                </h4>
+            </div>
+            <div class="card-body">
+                <form method="post" asp-action="Checkout">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <h5 class="mb-3">
+                        <i class="fas fa-user me-2"></i>Informations de livraison
+                    </h5>
+
+                    <div class="mb-3">
+                        <label asp-for="CustomerName" class="form-label"></label>
+                        <input asp-for="CustomerName" class="form-control" />
+                        <span asp-validation-for="CustomerName" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="CustomerEmail" class="form-label"></label>
+                        <input asp-for="CustomerEmail" class="form-control" />
+                        <span asp-validation-for="CustomerEmail" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Notes" class="form-label">
+                            <i class="fas fa-sticky-note me-2"></i>Notes de commande (optionnel)
+                        </label>
+                        <textarea asp-for="Notes" class="form-control" rows="3" placeholder="Instructions de livraison, commentaires..."></textarea>
+                        <span asp-validation-for="Notes" class="text-danger"></span>
+                    </div>
+
+                    @if (Model.HasSufficientCredits)
+                    {
+                        <button type="submit" class="btn btn-success btn-lg w-100">
+                            <i class="fas fa-check me-2"></i>Confirmer la commande
+                        </button>
+                    }
+                    else
+                    {
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Crédits insuffisants pour passer cette commande.
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-lg w-100" disabled>
+                            <i class="fas fa-ban me-2"></i>Crédits insuffisants
+                        </button>
+                    }
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Résumé de commande -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-receipt me-2"></i>Résumé de votre commande
+                </h5>
+            </div>
+            <div class="card-body">
+                @foreach (var item in Model.Cart.Items)
+                {
+                    <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                        <div>
+                            <div class="fw-bold">@item.BookTitle</div>
+                            <small class="text-muted">Quantité: @item.Quantity</small>
+                        </div>
+                        <span class="text-primary fw-bold">@item.TotalPrice.ToString("C")</span>
+                    </div>
+                }
+
+                <hr />
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Sous-total</span>
+                    <span>@Model.Cart.TotalAmount.ToString("C")</span>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Livraison</span>
+                    <span class="text-success">Gratuit</span>
+                </div>
+                <hr />
+                <div class="d-flex justify-content-between mb-3">
+                    <strong>Total</strong>
+                    <strong class="text-primary">@Model.Cart.TotalAmount.ToString("C")</strong>
+                </div>
+
+                <div class="bg-light p-3 rounded">
+                    <div class="d-flex justify-content-between">
+                        <span>Vos crédits</span>
+                        <credit-display amount="@Model.UserCredits"></credit-display>
+                    </div>
+                    <div class="d-flex justify-content-between mt-2">
+                        <span>Après commande</span>
+                        <span class="@(Model.HasSufficientCredits ? "text-success" : "text-danger")">
+                            @((Model.UserCredits - Model.Cart.TotalAmount).ToString("C"))
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        // Update quantity functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update quantity buttons
+            document.querySelectorAll('.update-quantity-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const bookId = this.dataset.bookId;
+                    const action = this.dataset.action;
+                    const quantityInput = document.querySelector(`input[data-book-id="${bookId}"]`);
+
+                    let newQuantity = parseInt(quantityInput.value);
+                    if (action === 'increase') {
+                        newQuantity++;
+                    } else if (action === 'decrease' && newQuantity > 1) {
+                        newQuantity--;
+                    }
+
+                    updateQuantity(bookId, newQuantity);
+                });
+            });
+
+            // Quantity input change
+            document.querySelectorAll('.quantity-input').forEach(input => {
+                input.addEventListener('change', function() {
+                    const bookId = this.dataset.bookId;
+                    const quantity = parseInt(this.value);
+                    updateQuantity(bookId, quantity);
+                });
+            });
+
+            // Remove item buttons
+            document.querySelectorAll('.remove-item-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const bookId = this.dataset.bookId;
+                    removeItem(bookId);
+                });
+            });
+        });
+
+        function updateQuantity(bookId, quantity) {
+            fetch('/Cart/Update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                },
+                body: `bookId=${bookId}&quantity=${quantity}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload(); // Reload to update all prices
+                } else {
+                    alert(data.message);
+                }
+            });
+        }
+
+        function removeItem(bookId) {
+            if (confirm('Êtes-vous sûr de vouloir retirer cet article du panier ?')) {
+                fetch('/Cart/Remove', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]')?.value || ''
+                    },
+                    body: `bookId=${bookId}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Erreur lors de la suppression.');
+                    }
+                });
+            }
+        }
+    </script>
+}

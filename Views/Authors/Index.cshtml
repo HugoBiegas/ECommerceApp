@@ -1,0 +1,118 @@
+﻿@* Authors/Index.cshtml *@
+@model List<Author>
+@{
+    ViewData["Title"] = "Auteurs";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>
+        <i class="fas fa-user-edit me-3"></i>
+        Nos Auteurs (@Model.Count)
+    </h1>
+    <div asp-role="@UserRole.Librarian">
+        <a asp-action="Create" class="btn btn-success">
+            <i class="fas fa-plus me-2"></i>Ajouter un auteur
+        </a>
+    </div>
+</div>
+
+<!-- Recherche -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" asp-action="Index" class="row g-3">
+            <div class="col-md-10">
+                <input name="searchTerm" value="@ViewBag.SearchTerm" class="form-control"
+                       placeholder="Rechercher par nom ou nationalité..." />
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search me-2"></i>Rechercher
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@if (Model.Any())
+{
+    <div class="row">
+        @foreach (var author in Model)
+        {
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-start mb-3">
+                            <div class="avatar-placeholder me-3">
+                                <i class="fas fa-user-circle fa-3x text-muted"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h5 class="card-title mb-1">@author.Name</h5>
+                                @if (!string.IsNullOrEmpty(author.Nationality))
+                                {
+                                    <p class="text-muted mb-2">
+                                        <i class="fas fa-globe me-1"></i>@author.Nationality
+                                    </p>
+                                }
+                                @if (author.BirthDate.HasValue)
+                                {
+                                    <p class="text-muted mb-0">
+                                        <i class="fas fa-birthday-cake me-1"></i>
+                                        @author.BirthDate.Value.ToString("dd/MM/yyyy")
+                                        (@author.Age ans)
+                                    </p>
+                                }
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(author.Biography))
+                        {
+                            <p class="card-text">
+                                @(author.Biography.Length > 100 ? author.Biography.Substring(0, 100) + "..." : author.Biography)
+                            </p>
+                        }
+
+                        <div class="mt-auto">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-book me-1"></i>
+                                    @author.Books.Count livre(s)
+                                </small>
+                                <div class="btn-group btn-group-sm">
+                                    <a asp-action="Details" asp-route-id="@author.Id" class="btn btn-outline-primary">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <div asp-role="@UserRole.Librarian">
+                                        <a asp-action="Edit" asp-route-id="@author.Id" class="btn btn-outline-secondary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a asp-action="Delete" asp-route-id="@author.Id" class="btn btn-outline-danger">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <div class="text-center py-5">
+        <i class="fas fa-user-edit fa-4x text-muted mb-4"></i>
+        <h4 class="text-muted">Aucun auteur trouvé</h4>
+        @if (!string.IsNullOrEmpty(ViewBag.SearchTerm))
+        {
+            <p class="text-muted">Aucun résultat pour "@ViewBag.SearchTerm"</p>
+            <a asp-action="Index" class="btn btn-primary">
+                <i class="fas fa-undo me-2"></i>Voir tous les auteurs
+            </a>
+        }
+        else
+        {
+            <p class="text-muted">La base d'auteurs est en cours de construction.</p>
+        }
+    </div>
+}

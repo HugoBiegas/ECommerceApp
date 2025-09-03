@@ -1,0 +1,61 @@
+﻿@* Account/RequestLibrarian.cshtml *@
+@model LibrarianRequestViewModel
+@{
+    ViewData["Title"] = "Demande de Libraire";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-success text-white text-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-user-plus me-2"></i>
+                    Demande de Libraire
+                </h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Devenir libraire vous permettra de :</strong>
+                    <ul class="mb-0 mt-2">
+                        <li>Ajouter de nouveaux livres au catalogue</li>
+                        <li>Modifier les informations des livres existants</li>
+                        <li>Gérer le stock et la disponibilité</li>
+                        <li>Voir toutes les commandes de la boutique</li>
+                    </ul>
+                </div>
+
+                <form method="post" asp-action="RequestLibrarian">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <div class="mb-4">
+                        <label asp-for="Reason" class="form-label">
+                            <i class="fas fa-comment me-2"></i>@Html.DisplayNameFor(m => m.Reason)
+                        </label>
+                        <textarea asp-for="Reason" class="form-control" rows="5"
+                                  placeholder="Expliquez pourquoi vous souhaitez devenir libraire, votre expérience avec les livres, vos motivations..."></textarea>
+                        <span asp-validation-for="Reason" class="text-danger"></span>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="fas fa-clock me-2"></i>
+                        Votre demande sera examinée par nos administrateurs. Vous recevrez une réponse dans les plus brefs délais.
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-paper-plane me-2"></i>Envoyer ma demande
+                        </button>
+                        <a asp-action="Profile" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-times me-2"></i>Annuler
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

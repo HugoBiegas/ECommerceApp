@@ -1,0 +1,223 @@
+﻿@* Admin/Statistics.cshtml *@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Statistiques Détaillées";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>
+        <i class="fas fa-chart-bar me-3"></i>
+        Statistiques Détaillées
+    </h1>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Retour au tableau de bord
+    </a>
+</div>
+
+<!-- Vue d'ensemble -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie me-2"></i>Vue d'ensemble
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                            <h3 class="text-primary">@Model.TotalUsers</h3>
+                            <p class="text-muted">Utilisateurs actifs</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <i class="fas fa-book fa-2x text-success mb-2"></i>
+                            <h3 class="text-success">@Model.TotalBooks</h3>
+                            <p class="text-muted">Livres en catalogue</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <i class="fas fa-shopping-bag fa-2x text-info mb-2"></i>
+                            <h3 class="text-info">@Model.TotalOrders</h3>
+                            <p class="text-muted">Commandes totales</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stat-card">
+                            <i class="fas fa-euro-sign fa-2x text-warning mb-2"></i>
+                            <h3 class="text-warning">@Model.TotalRevenue.ToString("C")</h3>
+                            <p class="text-muted">Chiffre d'affaires</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Répartition par rôles -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-user-friends me-2"></i>Répartition des Utilisateurs par Rôle
+                </h5>
+            </div>
+            <div class="card-body">
+                @if (ViewBag.UsersByRole != null)
+                {
+                    @foreach (var roleGroup in ViewBag.UsersByRole)
+                    {
+                        var role = (UserRole)roleGroup.Key;
+                        var count = roleGroup.Value;
+                        var percentage = Model.TotalUsers > 0 ? (count * 100.0 / Model.TotalUsers) : 0;
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span>
+                                    <role-badge role="@role"></role-badge>
+                                    <span class="ms-2">@count utilisateur(s)</span>
+                                </span>
+                                <small class="text-muted">@percentage.ToString("F1")%</small>
+                            </div>
+                            <div class="progress" style="height: 8px;">
+                                <div class="progress-bar bg-@(role == UserRole.Admin ? "danger" : role == UserRole.Librarian ? "primary" : "secondary")"
+                                     style="width: @percentage%"></div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Répartition par statut de commande -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-clipboard-list me-2"></i>Commandes par Statut
+                </h5>
+            </div>
+            <div class="card-body">
+                @if (ViewBag.OrdersByStatus != null)
+                {
+                    @foreach (var statusGroup in ViewBag.OrdersByStatus)
+                    {
+                        var status = (OrderStatus)statusGroup.Key;
+                        var count = statusGroup.Value;
+                        var percentage = Model.TotalOrders > 0 ? (count * 100.0 / Model.TotalOrders) : 0;
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <span>
+                                    <order-status status="@status"></order-status>
+                                    <span class="ms-2">@count commande(s)</span>
+                                </span>
+                                <small class="text-muted">@percentage.ToString("F1")%</small>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                @{
+                                    var progressColor = status switch
+                                    {
+                                        OrderStatus.Delivered => "success",
+                                        OrderStatus.Shipped => "primary",
+                                        OrderStatus.Processing => "info",
+                                        OrderStatus.Pending => "warning",
+                                        OrderStatus.Cancelled => "danger",
+                                        _ => "secondary"
+                                    };
+                                }
+                                <div class="progress-bar bg-@progressColor" style="width: @percentage%"></div>
+                            </div>
+                        </div>
+                    }
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Top livres -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-trophy me-2"></i>Top 10 des Livres les Plus Populaires
+                </h5>
+            </div>
+            <div class="card-body">
+                @if (Model.TopSellingBooks.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Livre</th>
+                                    <th>Auteur</th>
+                                    <th>Catégorie</th>
+                                    <th>Prix</th>
+                                    <th>Stock</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (int i = 0; i < Model.TopSellingBooks.Count; i++)
+                                {
+                                    var book = Model.TopSellingBooks[i];
+                                    <tr>
+                                        <td>
+                                            @if (i < 3)
+                                            {
+                                                <i class="fas fa-medal text-@(i == 0 ? "warning" : i == 1 ? "secondary" : "dark")"></i>
+                                            }
+                                            else
+                                            {
+                                                <span class="badge bg-light text-dark">@(i + 1)</span>
+                                            }
+                                        </td>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <img src="@(book.ImageUrl ?? "/images/book-placeholder.jpg")"
+                                                     class="rounded me-2" alt="@book.Title"
+                                                     style="width: 40px; height: 50px; object-fit: cover;" />
+                                                <strong>@book.Title</strong>
+                                            </div>
+                                        </td>
+                                        <td>@book.Author?.Name</td>
+                                        <td><category-badge category="@book.Category"></category-badge></td>
+                                        <td><price-display price="@book.Price" size="small"></price-display></td>
+                                        <td>
+                                            <stock-indicator stock="@book.Stock" is-available="@book.IsAvailable"></stock-indicator>
+                                        </td>
+                                        <td>
+                                            <a asp-controller="Books" asp-action="Details" asp-route-id="@book.Id"
+                                               class="btn btn-sm btn-outline-primary">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-4">
+                        <i class="fas fa-chart-bar fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Aucune donnée de vente disponible</h5>
+                        <p class="text-muted">Les statistiques apparaîtront après les premières commandes.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,106 @@
+﻿@* Account/Register.cshtml *@
+@model RegisterViewModel
+@{
+    ViewData["Title"] = "Inscription";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white text-center">
+                <h4 class="mb-0">
+                    <i class="fas fa-user-plus me-2"></i>
+                    Créer un compte
+                </h4>
+                <p class="mb-0 mt-2">
+                    <small><i class="fas fa-gift me-1"></i>Recevez 100€ de crédits gratuits !</small>
+                </p>
+            </div>
+            <div class="card-body p-4">
+                <form method="post" asp-action="Register" asp-controller="Account">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="FirstName" class="form-label">
+                                <i class="fas fa-user me-1"></i>Prénom
+                            </label>
+                            <input asp-for="FirstName" class="form-control" placeholder="Jean" />
+                            <span asp-validation-for="FirstName" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="LastName" class="form-label">
+                                <i class="fas fa-user me-1"></i>Nom
+                            </label>
+                            <input asp-for="LastName" class="form-control" placeholder="Dupont" />
+                            <span asp-validation-for="LastName" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Username" class="form-label">
+                            <i class="fas fa-at me-1"></i>Nom d'utilisateur
+                        </label>
+                        <input asp-for="Username" class="form-control" placeholder="jean.dupont" />
+                        <span asp-validation-for="Username" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label">
+                            <i class="fas fa-envelope me-1"></i>Adresse email
+                        </label>
+                        <input asp-for="Email" class="form-control" placeholder="jean.dupont@email.com" />
+                        <span asp-validation-for="Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Password" class="form-label">
+                                <i class="fas fa-lock me-1"></i>Mot de passe
+                            </label>
+                            <input asp-for="Password" class="form-control" placeholder="••••••••" />
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="ConfirmPassword" class="form-label">
+                                <i class="fas fa-lock me-1"></i>Confirmer
+                            </label>
+                            <input asp-for="ConfirmPassword" class="form-control" placeholder="••••••••" />
+                            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Avantages de l'inscription :</strong>
+                        <ul class="mb-0 mt-2">
+                            <li>100€ de crédits offerts</li>
+                            <li>Accès à tout le catalogue</li>
+                            <li>Suivi de vos commandes</li>
+                            <li>Possibilité de devenir libraire</li>
+                        </ul>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Créer mon compte
+                        </button>
+                    </div>
+                </form>
+
+                <hr class="my-4">
+
+                <div class="text-center">
+                    <p class="mb-2">Déjà un compte ?</p>
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary">
+                        <i class="fas fa-sign-in-alt me-2"></i>Se connecter
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

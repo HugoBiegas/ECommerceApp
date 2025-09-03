@@ -1,0 +1,184 @@
+﻿@* Admin/Index.cshtml *@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Tableau de bord Admin";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>
+        <i class="fas fa-tachometer-alt me-3"></i>
+        Tableau de bord Administrateur
+    </h1>
+    <div class="btn-group">
+        <a asp-action="Users" class="btn btn-outline-primary">
+            <i class="fas fa-users me-2"></i>Gérer les utilisateurs
+        </a>
+        <a asp-action="Statistics" class="btn btn-outline-info">
+            <i class="fas fa-chart-bar me-2"></i>Statistiques détaillées
+        </a>
+    </div>
+</div>
+
+<!-- Statistiques principales -->
+<div class="row mb-5">
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card bg-primary text-white h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-users fa-2x mb-3"></i>
+                <h4 class="card-title">@Model.TotalUsers</h4>
+                <p class="card-text">Utilisateurs actifs</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card bg-success text-white h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-book fa-2x mb-3"></i>
+                <h4 class="card-title">@Model.TotalBooks</h4>
+                <p class="card-text">Livres en catalogue</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card bg-info text-white h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-shopping-bag fa-2x mb-3"></i>
+                <h4 class="card-title">@Model.TotalOrders</h4>
+                <p class="card-text">Commandes totales</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="card bg-warning text-dark h-100">
+            <div class="card-body text-center">
+                <i class="fas fa-euro-sign fa-2x mb-3"></i>
+                <h4 class="card-title">@Model.TotalRevenue.ToString("C")</h4>
+                <p class="card-text">Chiffre d'affaires</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistiques du jour -->
+<div class="row mb-5">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-gradient-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-calendar-day me-2"></i>Activité d'aujourd'hui
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h3 class="text-primary">@Model.TodayOrders</h3>
+                        <p class="text-muted">Commandes</p>
+                    </div>
+                    <div class="col-6">
+                        <h3 class="text-success">@Model.TodayRevenue.ToString("C")</h3>
+                        <p class="text-muted">Revenus</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-gradient-success text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-bell me-2"></i>Notifications
+                </h5>
+            </div>
+            <div class="card-body">
+                @if (Model.PendingLibrarianRequests > 0)
+                {
+                    <div class="alert alert-warning">
+                        <i class="fas fa-user-plus me-2"></i>
+                        <strong>@Model.PendingLibrarianRequests</strong> demande(s) de libraire en attente
+                        <br />
+                        <a asp-action="Users" class="btn btn-sm btn-warning mt-2">
+                            <i class="fas fa-eye me-1"></i>Voir les demandes
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center text-muted">
+                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                        <p>Aucune notification en attente</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Livres les plus vendus et commandes récentes -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-star me-2"></i>Livres populaires
+                </h5>
+            </div>
+            <div class="card-body">
+                @if (Model.TopSellingBooks.Any())
+                {
+                    @foreach (var book in Model.TopSellingBooks)
+                    {
+                        <div class="d-flex align-items-center mb-3">
+                            <img src="@(book.ImageUrl ?? "/images/book-placeholder.jpg")"
+                                 class="rounded me-3" alt="@book.Title" style="width: 50px; height: 60px; object-fit: cover;" />
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">@book.Title</h6>
+                                <small class="text-muted">@book.Author?.Name</small>
+                                <br />
+                                <price-display price="@book.Price" size="small"></price-display>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted text-center">Aucune donnée de vente disponible</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-clock me-2"></i>Commandes récentes
+                </h5>
+            </div>
+            <div class="card-body">
+                @if (Model.RecentOrders.Any())
+                {
+                    @foreach (var order in Model.RecentOrders)
+                    {
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom">
+                            <div>
+                                <h6 class="mb-1">Commande #@order.Id</h6>
+                                <small class="text-muted">@order.CustomerName</small>
+                                <br />
+                                <small class="text-muted">@order.OrderDate.ToString("dd/MM à HH:mm")</small>
+                            </div>
+                            <div class="text-end">
+                                <order-status status="@order.Status"></order-status>
+                                <br />
+                                <price-display price="@order.TotalAmount" size="small"></price-display>
+                            </div>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <p class="text-muted text-center">Aucune commande récente</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>

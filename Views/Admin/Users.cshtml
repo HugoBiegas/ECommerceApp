@@ -1,0 +1,231 @@
+﻿@* Admin/Users.cshtml *@
+@model UserManagementViewModel
+@{
+    ViewData["Title"] = "Gestion des Utilisateurs";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>
+        <i class="fas fa-users me-3"></i>
+        Gestion des Utilisateurs
+    </h1>
+    <a asp-action="Index" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>Retour au tableau de bord
+    </a>
+</div>
+
+<!-- Demandes de libraire en attente -->
+@if (Model.PendingRequests.Any())
+{
+    <div class="card mb-4">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0">
+                <i class="fas fa-user-plus me-2"></i>
+                Demandes de Libraire en Attente (@Model.PendingRequests.Count)
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>Utilisateur</th>
+                            <th>Email</th>
+                            <th>Date de demande</th>
+                            <th>Raison</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var request in Model.PendingRequests)
+                        {
+                            <tr>
+                                <td>
+                                    <strong>@request.Username</strong>
+                                </td>
+                                <td>@request.Email</td>
+                                <td>@request.RequestDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                <td>
+                                    <small>@request.Reason</small>
+                                </td>
+                                <td>
+                                    <div class="btn-group btn-group-sm">
+                                        <form method="post" asp-action="ApproveLibrarianRequest" class="d-inline">
+                                            <input type="hidden" name="requestId" value="@request.Id" />
+                                            <button type="submit" class="btn btn-success btn-sm">
+                                                <i class="fas fa-check"></i> Approuver
+                                            </button>
+                                        </form>
+                                        <form method="post" asp-action="RejectLibrarianRequest" class="d-inline">
+                                            <input type="hidden" name="requestId" value="@request.Id" />
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="fas fa-times"></i> Rejeter
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Liste des utilisateurs -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-list me-2"></i>
+            Tous les Utilisateurs (@Model.Users.Count)
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th>Utilisateur</th>
+                        <th>Email</th>
+                        <th>Rôle</th>
+                        <th>Crédits</th>
+                        <th>Membre depuis</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model.Users)
+                    {
+                        <tr class="@(!user.IsActive ? "table-secondary" : "")">
+                            <td>
+                                <strong>@user.Username</strong>
+                                @if (!string.IsNullOrEmpty(user.FullName))
+                                {
+                                    <br />
+                            
+                                    <small class="text-muted">@user.FullName</small>
+                                }
+                            </td>
+                            <td>@user.Email</td>
+                            <td>
+                                <role-badge role="@user.Role"></role-badge>
+                            </td>
+                            <td>
+                                <credit-display amount="@user.Credits" show-icon="false"></credit-display>
+                            </td>
+                            <td>
+                                <small>@user.CreatedDate.ToString("dd/MM/yyyy")</small>
+                            </td>
+                            <td>
+                                @if (user.IsActive)
+                                {
+                                    <span class="badge bg-success">Actif</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Inactif</span>
+                                }
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm">
+                                    <!-- Modifier le rôle -->
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button"
+                                                data-bs-toggle="dropdown">
+                                            <i class="fas fa-user-cog"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            @foreach (var role in ViewBag.UserRoles)
+                                            {
+                                                @if (role.Value != (int)user.Role)
+                                                {
+                                                    <li>
+                                                        <form method="post" asp-action="UpdateUserRole" class="d-inline">
+                                                            <input type="hidden" name="userId" value="@user.Id" />
+                                                            <input type="hidden" name="role" value="@role.Value" />
+                                                            <button type="submit" class="dropdown-item">
+                                                                Promouvoir en @role.Text
+                                                            </button>
+                                                        </form>
+                                                    </li>
+                                                }
+                                            }
+                                        </ul>
+                                    </div>
+
+                                    <!-- Modifier les crédits -->
+                                    <button type="button" class="btn btn-outline-success btn-sm"
+                                            data-bs-toggle="modal" data-bs-target="#creditsModal@(user.Id)">
+                                        <i class="fas fa-coins"></i>
+                                    </button>
+
+                                    <!-- Activer/Désactiver -->
+                                    @if (user.IsActive)
+                                    {
+                                        <form method="post" asp-action="DeactivateUser" class="d-inline">
+                                            <input type="hidden" name="userId" value="@user.Id" />
+                                            <button type="submit" class="btn btn-outline-secondary btn-sm"
+                                                    onclick="return confirm('Désactiver cet utilisateur ?')">
+                                                <i class="fas fa-user-slash"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form method="post" asp-action="ActivateUser" class="d-inline">
+                                            <input type="hidden" name="userId" value="@user.Id" />
+                                            <button type="submit" class="btn btn-outline-success btn-sm">
+                                                <i class="fas fa-user-check"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                </div>
+
+                                <!-- Modal pour modifier les crédits -->
+                                <div class="modal fade" id="creditsModal@(user.Id)" tabindex="-1" aria-hidden="true">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Modifier les crédits de @user.Username</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <form method="post" asp-action="UpdateUserCredits">
+                                                <div class="modal-body">
+                                                    <input type="hidden" name="userId" value="@user.Id" />
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Crédits actuels</label>
+                                                        <div class="form-control-plaintext">
+                                                            <credit-display amount="@user.Credits"></credit-display>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Nouveaux crédits</label>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">€</span>
+                                                            <input type="number" name="credits" class="form-control"
+                                                                   value="@user.Credits" min="0" step="0.01" />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                        Annuler
+                                                    </button>
+                                                    <button type="submit" class="btn btn-primary">
+                                                        <i class="fas fa-save me-2"></i>Sauvegarder
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
