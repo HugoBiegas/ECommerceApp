@@ -508,21 +508,4 @@ Cart        : Panier d'achat en session
 
 ---
 
-## 👨‍🏫 **Remerciements**
-
-Projet réalisé sous la supervision de **Prof. Marcel Stefan Wagner, PhD** dans le cadre du cours "Retail (e-commerce)" à l'**ESTIAM**.
-
-Merci pour l'encadrement technique et les conseils méthodologiques qui ont permis la réalisation de cette application complète et professionnelle.
-
----
-
-## 📞 **Support et Contact**
-
-Pour toute question technique ou demande d'amélioration :
-- **Email étudiant** : [votre.email@estiam.com]
-- **Repository GitHub** : [URL_DU_REPOSITORY]
-- **Institution** : ESTIAM - École Supérieure des Technologies de l'Information Appliquées au Management
-
----
-
 *Développé avec ❤️ par les étudiants ESTIAM sous la direction de Prof. Marcel Stefan Wagner, PhD*
