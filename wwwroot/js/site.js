@@ -1,4 +1,4 @@
-﻿// Enhanced JavaScript for BookStore
+﻿// Enhanced JavaScript for BookStore - FIXED VERSION
 // Site-wide functionality
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -12,22 +12,32 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // Toast Management
 function initializeToasts() {
-    // Auto-hide toasts after 5 seconds
-    const toasts = document.querySelectorAll('.toast');
-    toasts.forEach(toast => {
+    // Auto-hide existing toasts after 5 seconds
+    const existingToasts = document.querySelectorAll('.toast');
+    existingToasts.forEach(toast => {
         setTimeout(() => {
             toast.classList.remove('show');
         }, 5000);
     });
 }
 
-// Cart Functionality
+// Cart Functionality - FIXED
 function initializeCartFunctionality() {
-    // Add to cart buttons
+    // Add to cart buttons - FIXED to prevent double events
     document.querySelectorAll('.add-to-cart-btn').forEach(button => {
-        button.addEventListener('click', function () {
+        // Remove any existing event listeners
+        button.replaceWith(button.cloneNode(true));
+    });
+
+    // Re-add event listeners
+    document.querySelectorAll('.add-to-cart-btn').forEach(button => {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
             const bookId = this.dataset.bookId;
-            const quantity = this.closest('.card-body')?.querySelector('input[name="quantity"]')?.value || 1;
+            const quantityInput = this.closest('.card-body')?.querySelector('input[name="quantity"]');
+            const quantity = quantityInput ? quantityInput.value : 1;
 
             addToCart(bookId, quantity, this);
         });
@@ -35,7 +45,8 @@ function initializeCartFunctionality() {
 
     // Quantity update buttons
     document.querySelectorAll('.update-quantity-btn').forEach(button => {
-        button.addEventListener('click', function () {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
             const bookId = this.dataset.bookId;
             const action = this.dataset.action;
             const quantityInput = document.querySelector(`input[data-book-id="${bookId}"]`);
@@ -56,7 +67,7 @@ function initializeCartFunctionality() {
 
     // Quantity input changes
     document.querySelectorAll('.quantity-input').forEach(input => {
-        input.addEventListener('change', function () {
+        input.addEventListener('change', function (e) {
             const bookId = this.dataset.bookId;
             const quantity = parseInt(this.value);
 
@@ -68,7 +79,8 @@ function initializeCartFunctionality() {
 
     // Remove item buttons
     document.querySelectorAll('.remove-item-btn').forEach(button => {
-        button.addEventListener('click', function () {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
             const bookId = this.dataset.bookId;
             const bookTitle = this.closest('.cart-item')?.querySelector('h6')?.textContent || 'cet article';
 
@@ -87,11 +99,10 @@ function initializeSearchFunctionality() {
         let searchTimeout;
         searchInput.addEventListener('input', function () {
             clearTimeout(searchTimeout);
-            // Note: Auto-submit désactivé pour éviter trop de requêtes
-            // Uncomment next lines to enable auto-search
-            // searchTimeout = setTimeout(() => {
-            //     this.form.submit();
-            // }, 800);
+            // Auto-search after 800ms of inactivity
+            searchTimeout = setTimeout(() => {
+                this.form.submit();
+            }, 800);
         });
     }
 
@@ -102,7 +113,7 @@ function initializeSearchFunctionality() {
         });
     });
 
-    // Price range inputs
+    // Price range validation
     const minPriceInput = document.querySelector('input[name="MinPrice"]');
     const maxPriceInput = document.querySelector('input[name="MaxPrice"]');
 
@@ -168,8 +179,11 @@ function initializeFormValidations() {
     });
 }
 
-// Cart API Functions
+// Cart API Functions - IMPROVED
 async function addToCart(bookId, quantity, buttonElement) {
+    // Prevent multiple clicks
+    if (buttonElement.disabled) return;
+
     try {
         // Show loading state
         const originalText = buttonElement.innerHTML;
@@ -185,13 +199,17 @@ async function addToCart(bookId, quantity, buttonElement) {
             body: `bookId=${bookId}&quantity=${quantity}`
         });
 
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
         const data = await response.json();
 
         if (data.success) {
             // Update cart count in navbar
             updateNavbarCartCount(data.cartCount);
 
-            // Show success feedback
+            // Show success feedback - FIXED: Only one toast
             showToast('success', 'Succès', data.message);
 
             // Animate button
@@ -229,6 +247,10 @@ async function updateCartQuantity(bookId, quantity) {
             body: `bookId=${bookId}&quantity=${quantity}`
         });
 
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+
         const data = await response.json();
 
         if (data.success) {
@@ -238,12 +260,12 @@ async function updateCartQuantity(bookId, quantity) {
         } else {
             showToast('error', 'Erreur', data.message);
             // Reset quantity to previous value
-            location.reload();
+            setTimeout(() => location.reload(), 1000);
         }
     } catch (error) {
         console.error('Update quantity error:', error);
         showToast('error', 'Erreur', 'Erreur lors de la mise à jour.');
-        location.reload();
+        setTimeout(() => location.reload(), 1000);
     }
 }
 
@@ -257,6 +279,10 @@ async function removeFromCart(bookId) {
             },
             body: `bookId=${bookId}`
         });
+
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
 
         const data = await response.json();
 
@@ -329,8 +355,19 @@ function updateNavbarCartCount(count) {
     }
 }
 
-// Toast Utilities
+// Toast Utilities - IMPROVED to prevent duplicates
+let activeToasts = new Set();
+
 function showToast(type, title, message) {
+    const toastKey = `${type}-${title}-${message}`;
+
+    // Prevent duplicate toasts
+    if (activeToasts.has(toastKey)) {
+        return;
+    }
+
+    activeToasts.add(toastKey);
+
     const toastContainer = document.querySelector('.toast-container') || createToastContainer();
     const toast = createToast(type, title, message);
     toastContainer.appendChild(toast);
@@ -343,6 +380,7 @@ function showToast(type, title, message) {
     // Auto-hide after 5 seconds
     setTimeout(() => {
         toast.classList.remove('show');
+        activeToasts.delete(toastKey);
         setTimeout(() => {
             if (toast.parentNode) {
                 toast.remove();
@@ -387,10 +425,17 @@ function createToast(type, title, message) {
     `;
 
     // Add click to dismiss functionality
-    toast.querySelector('.btn-close').addEventListener('click', () => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 500);
-    });
+    const closeButton = toast.querySelector('.btn-close');
+    if (closeButton) {
+        closeButton.addEventListener('click', () => {
+            toast.classList.remove('show');
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 500);
+        });
+    }
 
     return toast;
 }
@@ -457,19 +502,22 @@ function initializeAnimations() {
     }
 }
 
-// Loading states for forms
+// Loading states for forms - IMPROVED
 document.querySelectorAll('form').forEach(form => {
-    form.addEventListener('submit', function () {
+    form.addEventListener('submit', function (e) {
         const submitButton = this.querySelector('button[type="submit"]');
-        if (submitButton && !submitButton.disabled) {
+        if (submitButton && !submitButton.disabled && !submitButton.dataset.noLoading) {
             const originalText = submitButton.innerHTML;
             submitButton.disabled = true;
             submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Chargement...';
 
+            // Store original text for restoration
+            submitButton.dataset.originalText = originalText;
+
             // Re-enable after 10 seconds as fallback
             setTimeout(() => {
-                if (submitButton.disabled) {
-                    submitButton.innerHTML = originalText;
+                if (submitButton.disabled && submitButton.dataset.originalText) {
+                    submitButton.innerHTML = submitButton.dataset.originalText;
                     submitButton.disabled = false;
                 }
             }, 10000);
@@ -582,3 +630,16 @@ function logPerformance() {
 
 // Initialize performance monitoring
 logPerformance();
+
+// FIXED: Handle form submissions properly for user registration
+document.querySelectorAll('form').forEach(form => {
+    // Add specific handling for registration form
+    if (form.action.includes('Register')) {
+        form.addEventListener('submit', function (e) {
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.dataset.noLoading = 'true'; // Prevent double loading states
+            }
+        });
+    }
+});

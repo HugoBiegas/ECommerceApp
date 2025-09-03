@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Razor.TagHelpers;
-using ECommerceApp.Models;
-using ECommerceApp.Models.Enums;
-
+using Microsoft.AspNetCore.Antiforgery;
 
 namespace ECommerceApp.TagHelpers
 {
@@ -16,9 +14,23 @@ namespace ECommerceApp.TagHelpers
         public string ButtonClass { get; set; } = "btn btn-danger";
         public string ModalId { get; set; } = "deleteModal";
 
+        [ViewContext]
+        public ViewContext ViewContext { get; set; } = null!;
+
+        private readonly IAntiforgery _antiforgery;
+
+        public ConfirmDeleteTagHelper(IAntiforgery antiforgery)
+        {
+            _antiforgery = antiforgery;
+        }
+
         public override void Process(TagHelperContext context, TagHelperOutput output)
         {
             output.TagName = null; // Remove the wrapper tag
+
+            // FIXED: Generate antiforgery token properly
+            var tokens = _antiforgery.GetAndStoreTokens(ViewContext.HttpContext);
+            var tokenInput = $"<input type=\"hidden\" name=\"{tokens.HeaderName}\" value=\"{tokens.RequestToken}\" />";
 
             output.Content.SetHtmlContent($@"
                 <button type=""button"" class=""{ButtonClass}"" data-bs-toggle=""modal"" data-bs-target=""#{ModalId}"">
@@ -46,7 +58,7 @@ namespace ECommerceApp.TagHelpers
                                     <i class=""fas fa-times""></i> Annuler
                                 </button>
                                 <form method=""post"" action=""{DeleteUrl}"" class=""d-inline"">
-                                    <input type=""hidden"" name=""__RequestVerificationToken"" value=""@Html.GetAntiforgeryToken()"" />
+                                    {tokenInput}
                                     <button type=""submit"" class=""btn btn-danger"">
                                         <i class=""fas fa-trash""></i> Confirmer la suppression
                                     </button>
@@ -57,5 +69,4 @@ namespace ECommerceApp.TagHelpers
                 </div>");
         }
     }
-
 }

@@ -1,4 +1,4 @@
-/* Custom CSS for BookStore */
+/* Custom CSS for BookStore - FIXED VERSION */
 
 html {
     font-size: 14px;
@@ -19,6 +19,7 @@ body {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    color: #212529; /* Ensure text is dark by default */
 }
 
 main {
@@ -54,14 +55,17 @@ main {
     background: linear-gradient(135deg, var(--bs-primary) 0%, #004499 100%);
     border-radius: 15px !important;
     box-shadow: 0 8px 32px rgba(0, 102, 204, 0.3);
+    color: white !important; /* Ensure text is white on dark background */
 }
 
-/* Cards */
+/* Cards - FIXED */
 .card {
     border: none;
     border-radius: 15px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease;
+    background-color: white; /* Ensure white background */
+    color: #212529; /* Ensure dark text on white cards */
 }
 
     .card:hover {
@@ -73,9 +77,24 @@ main {
     border-radius: 15px 15px 0 0;
 }
 
-/* Book Cards */
+/* FIXED: Card text visibility */
+.card-body {
+    color: #212529 !important; /* Force dark text */
+}
+
+.card-title {
+    color: #212529 !important;
+    font-weight: 600;
+}
+
+.card-text {
+    color: #6c757d !important; /* Bootstrap muted color for descriptions */
+}
+
+/* Book Cards - FIXED */
 .book-card {
     transition: all 0.3s ease;
+    background-color: white;
 }
 
     .book-card:hover {
@@ -90,6 +109,21 @@ main {
 
     .book-card:hover .card-img-top {
         transform: scale(1.05);
+    }
+
+    /* FIXED: Ensure book card text is visible */
+    .book-card .card-body {
+        background-color: white;
+        color: #212529 !important;
+    }
+
+    .book-card .card-title {
+        color: #212529 !important;
+        font-weight: 600;
+    }
+
+    .book-card .text-muted {
+        color: #6c757d !important;
     }
 
 /* Buttons */
@@ -108,25 +142,30 @@ main {
 .btn-primary {
     background: linear-gradient(135deg, var(--bs-primary) 0%, #0052a3 100%);
     box-shadow: 0 4px 15px rgba(0, 102, 204, 0.3);
+    color: white !important;
 }
 
     .btn-primary:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(0, 102, 204, 0.4);
+        color: white !important;
     }
 
 .btn-success {
     background: linear-gradient(135deg, var(--bs-success) 0%, #1e7e34 100%);
     box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    color: white !important;
 }
 
 .btn-outline-primary {
     border: 2px solid var(--bs-primary);
     color: var(--bs-primary);
+    background-color: transparent;
 }
 
     .btn-outline-primary:hover {
         background: var(--bs-primary);
+        color: white !important;
         transform: translateY(-2px);
     }
 
@@ -160,37 +199,80 @@ main {
     border-radius: 15px;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
     padding: 15px 0;
+    background-color: white;
 }
 
 .dropdown-item {
     padding: 10px 20px;
     font-weight: 500;
     transition: all 0.3s ease;
+    color: #212529 !important;
 }
 
     .dropdown-item:hover {
         background-color: var(--bs-light);
         padding-left: 25px;
+        color: #212529 !important;
     }
 
-/* Forms */
+/* Forms - FIXED Placeholders */
 .form-control {
     border-radius: 10px;
     border: 2px solid #e9ecef;
     padding: 12px 15px;
     transition: all 0.3s ease;
     font-weight: 500;
+    background-color: white;
+    color: #212529;
 }
 
     .form-control:focus {
         border-color: var(--bs-primary);
         box-shadow: 0 0 0 0.2rem rgba(0, 102, 204, 0.25);
+        background-color: white;
+        color: #212529;
+    }
+
+    /* FIXED: Placeholder styling */
+    .form-control::placeholder {
+        color: #6c757d !important;
+        opacity: 0.7;
+    }
+
+    .form-control:focus::placeholder {
+        color: #6c757d !important;
+        opacity: 0.5;
     }
 
 .form-control-lg {
     padding: 15px 20px;
     font-size: 1.1rem;
 }
+
+/* FIXED: Login/Register form specific styling */
+.card .form-control {
+    background-color: white !important;
+    color: #212529 !important;
+}
+
+    .card .form-control::placeholder {
+        color: #6c757d !important;
+        opacity: 0.8;
+    }
+
+/* Test accounts section - FIXED */
+.bg-light {
+    background-color: #f8f9fa !important;
+    color: #212529 !important;
+}
+
+    .bg-light strong {
+        color: #212529 !important;
+    }
+
+    .bg-light p {
+        color: #212529 !important;
+    }
 
 /* Badges */
 .badge {
@@ -201,18 +283,22 @@ main {
 
 .bg-purple {
     background-color: var(--bs-purple) !important;
+    color: white !important;
 }
 
 .bg-pink {
     background-color: var(--bs-pink) !important;
+    color: white !important;
 }
 
 .bg-orange {
     background-color: var(--bs-orange) !important;
+    color: white !important;
 }
 
 .bg-cyan {
     background-color: var(--bs-cyan) !important;
+    color: white !important;
 }
 
 /* Alerts */
@@ -240,7 +326,7 @@ main {
     font-weight: 600;
 }
 
-/* Features Section */
+/* Features Section - FIXED */
 .feature-icon {
     width: 80px;
     height: 80px;
@@ -251,6 +337,21 @@ main {
     border-radius: 20px;
     background: linear-gradient(135deg, rgba(0, 102, 204, 0.1) 0%, rgba(0, 82, 163, 0.1) 100%);
 }
+
+/* FIXED: Features cards */
+.col-md-4 .card {
+    background-color: white !important;
+    color: #212529 !important;
+}
+
+    .col-md-4 .card .card-title {
+        color: #212529 !important;
+        font-weight: 600;
+    }
+
+    .col-md-4 .card .card-text {
+        color: #6c757d !important;
+    }
 
 /* Price Display */
 .price-display {
@@ -273,6 +374,7 @@ main {
     padding: 15px;
     border-radius: 10px;
     background-color: var(--bs-light);
+    color: #212529;
 }
 
 /* Section Titles */
@@ -296,10 +398,12 @@ main {
 /* Footer */
 footer {
     background: linear-gradient(135deg, var(--bs-dark) 0%, #212529 100%);
+    color: white !important;
 }
 
     footer a {
         transition: all 0.3s ease;
+        color: #adb5bd !important;
     }
 
         footer a:hover {
@@ -322,6 +426,24 @@ footer {
 
 .animate-fade-in-up {
     animation: fadeInUp 0.8s ease-out;
+}
+
+@keyframes bounce {
+    0%, 20%, 53%, 80%, 100% {
+        transform: translate3d(0,0,0);
+    }
+
+    40%, 43% {
+        transform: translate3d(0, -8px, 0);
+    }
+
+    70% {
+        transform: translate3d(0, -4px, 0);
+    }
+
+    90% {
+        transform: translate3d(0, -2px, 0);
+    }
 }
 
 /* Modal */
@@ -350,19 +472,25 @@ footer {
 
     .table thead th {
         background: linear-gradient(135deg, var(--bs-primary) 0%, #004499 100%);
-        color: white;
+        color: white !important;
         font-weight: 600;
         border: none;
     }
 
     .table tbody tr {
         transition: all 0.3s ease;
+        background-color: white;
+        color: #212529;
     }
 
         .table tbody tr:hover {
             background-color: rgba(0, 102, 204, 0.05);
             transform: scale(1.01);
         }
+
+    .table tbody td {
+        color: #212529 !important;
+    }
 
 /* Pagination */
 .pagination {
@@ -375,22 +503,141 @@ footer {
     border: none;
     font-weight: 500;
     transition: all 0.3s ease;
+    color: #212529;
+    background-color: white;
 }
 
     .page-link:hover {
         background-color: var(--bs-primary);
-        color: white;
+        color: white !important;
         transform: translateY(-2px);
     }
 
 /* Gradient backgrounds */
 .bg-gradient-primary {
     background: linear-gradient(135deg, var(--bs-primary) 0%, #004499 100%);
+    color: white !important;
 }
 
 .bg-gradient-success {
     background: linear-gradient(135deg, var(--bs-success) 0%, #1e7e34 100%);
+    color: white !important;
 }
+
+/* FIXED: Stats cards on homepage */
+.col-lg-3 .card,
+.col-md-3 .card {
+    background-color: white !important;
+}
+
+    .col-lg-3 .card .card-body,
+    .col-md-3 .card .card-body {
+        color: #212529 !important;
+    }
+
+    .col-lg-3 .card.bg-primary,
+    .col-lg-3 .card.bg-success,
+    .col-lg-3 .card.bg-info,
+    .col-lg-3 .card.bg-warning {
+        color: white !important;
+    }
+
+        .col-lg-3 .card.bg-primary .card-body,
+        .col-lg-3 .card.bg-success .card-body,
+        .col-lg-3 .card.bg-info .card-body {
+            color: white !important;
+        }
+
+        .col-lg-3 .card.bg-warning .card-body {
+            color: #212529 !important;
+        }
+
+/* FIXED: Text contrast for all muted text */
+.text-muted {
+    color: #6c757d !important;
+}
+
+/* FIXED: Stock indicators */
+.stock-indicator {
+    color: #212529;
+}
+
+    .stock-indicator .alert {
+        color: inherit;
+    }
+
+    .stock-indicator .alert-success {
+        color: #155724 !important;
+    }
+
+    .stock-indicator .alert-warning {
+        color: #856404 !important;
+    }
+
+    .stock-indicator .alert-danger {
+        color: #721c24 !important;
+    }
+
+/* FIXED: Form labels and inputs */
+.form-label {
+    color: #212529 !important;
+    font-weight: 500;
+}
+
+/* FIXED: Login/Register cards - Keep white background for forms */
+.card-header {
+    border-radius: 15px 15px 0 0;
+}
+
+/* SPECIAL: Login and Register forms need white background */
+.row.justify-content-center .card,
+.col-md-6 .card.shadow,
+.col-md-8.col-lg-6 .card.shadow,
+.col-lg-4 .card.shadow,
+.col-md-4 .card.shadow {
+    background-color: white !important;
+    color: #212529 !important;
+}
+
+    .row.justify-content-center .card .card-body,
+    .col-md-6 .card.shadow .card-body,
+    .col-md-8.col-lg-6 .card.shadow .card-body,
+    .col-lg-4 .card.shadow .card-body,
+    .col-md-4 .card.shadow .card-body {
+        background-color: white !important;
+        color: #212529 !important;
+    }
+
+/* FIXED: Test accounts section styling */
+.text-sm {
+    font-size: 0.875rem;
+}
+
+.bg-light.p-2 {
+    background-color: #e9ecef !important;
+    color: #212529 !important;
+}
+
+    .bg-light.p-2 strong {
+        color: #212529 !important;
+    }
+
+/* FIXED: Forms inside white cards */
+.card.shadow .form-control {
+    background-color: white !important;
+    color: #212529 !important;
+    border-color: #e9ecef;
+}
+
+    .card.shadow .form-control::placeholder {
+        color: #6c757d !important;
+        opacity: 0.8;
+    }
+
+    .card.shadow .form-control:focus::placeholder {
+        color: #6c757d !important;
+        opacity: 0.5;
+    }
 
 /* Responsive */
 @media (max-width: 768px) {
@@ -412,18 +659,10 @@ footer {
     }
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-    .card {
-        background-color: #2d3748;
-        color: #e2e8f0;
-    }
-
-    .form-control {
-        background-color: #2d3748;
-        border-color: #4a5568;
-        color: #e2e8f0;
-    }
+/* FIXED: Dark mode override - disable for consistency */
+body {
+    background-color: #f8f9fa !important;
+    color: #212529 !important;
 }
 
 /* Print styles */
@@ -436,4 +675,32 @@ footer {
         box-shadow: none;
         border: 1px solid #dee2e6;
     }
+}
+
+/* FIXED: Additional contrast fixes */
+.small,
+small {
+    color: #6c757d !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #212529 !important;
+}
+
+/* FIXED: Price displays */
+.h5.text-primary {
+    color: var(--bs-primary) !important;
+}
+
+.text-primary {
+    color: var(--bs-primary) !important;
+}
+
+/* FIXED: Ensure all card content is visible */
+.card .badge {
+    color: white;
+}
+
+.card .btn {
+    color: white;
 }

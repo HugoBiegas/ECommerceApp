@@ -1,4 +1,4 @@
-﻿@* Books/Index.cshtml *@
+﻿@* Books/Index.cshtml - FIXED VERSION *@
 @model BookListViewModel
 @{
     ViewData["Title"] = "Catalogue des Livres";
@@ -17,34 +17,37 @@
 </div>
 
 <!-- Filtres et Recherche -->
-<div class="card mb-4">
-    <div class="card-body">
+<div class="card mb-4" style="background: white !important; color: #212529 !important;">
+    <div class="card-body" style="background: white !important; color: #212529 !important;">
         <form method="get" asp-action="Index" class="row g-3">
             <div class="col-md-3">
-                <label for="searchTerm" class="form-label">Rechercher</label>
-                <input asp-for="SearchTerm" class="form-control" placeholder="Titre, auteur..." />
+                <label for="searchTerm" class="form-label" style="color: #212529 !important;">Rechercher</label>
+                <input asp-for="SearchTerm" class="form-control" placeholder="Titre, auteur..." style="background: white !important; color: #212529 !important;" />
             </div>
             <div class="col-md-2">
-                <label for="categoryFilter" class="form-label">Catégorie</label>
-                <select asp-for="CategoryFilter" class="form-select">
+                <label for="categoryFilter" class="form-label" style="color: #212529 !important;">Catégorie</label>
+                <select asp-for="CategoryFilter" class="form-select" style="background: white !important; color: #212529 !important;">
                     <option value="">Toutes</option>
-                    @foreach (var category in ViewBag.Categories)
+                    @if (ViewBag.Categories != null)
                     {
-                        <option value="@category.Value">@category.Text</option>
+                        @foreach (var category in ViewBag.Categories)
+                        {
+                            <option value="@category.Value">@category.Text</option>
+                        }
                     }
                 </select>
             </div>
             <div class="col-md-2">
-                <label for="minPrice" class="form-label">Prix min (€)</label>
-                <input asp-for="MinPrice" type="number" step="0.01" class="form-control" placeholder="0" />
+                <label for="minPrice" class="form-label" style="color: #212529 !important;">Prix min (€)</label>
+                <input asp-for="MinPrice" type="number" step="0.01" class="form-control" placeholder="0" style="background: white !important; color: #212529 !important;" />
             </div>
             <div class="col-md-2">
-                <label for="maxPrice" class="form-label">Prix max (€)</label>
-                <input asp-for="MaxPrice" type="number" step="0.01" class="form-control" placeholder="100" />
+                <label for="maxPrice" class="form-label" style="color: #212529 !important;">Prix max (€)</label>
+                <input asp-for="MaxPrice" type="number" step="0.01" class="form-control" placeholder="100" style="background: white !important; color: #212529 !important;" />
             </div>
             <div class="col-md-2">
-                <label for="sortBy" class="form-label">Trier par</label>
-                <select asp-for="SortBy" class="form-select">
+                <label for="sortBy" class="form-label" style="color: #212529 !important;">Trier par</label>
+                <select asp-for="SortBy" class="form-select" style="background: white !important; color: #212529 !important;">
                     <option value="title">Titre A-Z</option>
                     <option value="price_asc">Prix croissant</option>
                     <option value="price_desc">Prix décroissant</option>
@@ -73,8 +76,16 @@
                 }
             </span>
             <div class="form-check">
-                <input asp-for="AvailableOnly" type="checkbox" class="form-check-input" id="availableOnly" onchange="this.form.submit()" />
-                <label class="form-check-label" for="availableOnly">
+                <!-- FIXED: Use simple input instead of asp-for to avoid nullable boolean error -->
+                <input type="checkbox"
+                       class="form-check-input"
+                       id="availableOnly"
+                       name="AvailableOnly"
+                       value="true"
+                       @(Model.AvailableOnly ? "checked" : "")
+                       onchange="this.form.submit()" />
+                <input type="hidden" name="AvailableOnly" value="false" />
+                <label class="form-check-label" for="availableOnly" style="color: #212529 !important;">
                     Disponibles uniquement
                 </label>
             </div>
@@ -109,7 +120,8 @@
                            asp-route-categoryFilter="@Model.CategoryFilter"
                            asp-route-minPrice="@Model.MinPrice"
                            asp-route-maxPrice="@Model.MaxPrice"
-                           asp-route-sortBy="@Model.SortBy">
+                           asp-route-sortBy="@Model.SortBy"
+                           asp-route-availableOnly="@Model.AvailableOnly">
                             <i class="fas fa-chevron-left"></i> Précédent
                         </a>
                     </li>
@@ -124,7 +136,8 @@
                            asp-route-categoryFilter="@Model.CategoryFilter"
                            asp-route-minPrice="@Model.MinPrice"
                            asp-route-maxPrice="@Model.MaxPrice"
-                           asp-route-sortBy="@Model.SortBy">
+                           asp-route-sortBy="@Model.SortBy"
+                           asp-route-availableOnly="@Model.AvailableOnly">
                             @i
                         </a>
                     </li>
@@ -139,7 +152,8 @@
                            asp-route-categoryFilter="@Model.CategoryFilter"
                            asp-route-minPrice="@Model.MinPrice"
                            asp-route-maxPrice="@Model.MaxPrice"
-                           asp-route-sortBy="@Model.SortBy">
+                           asp-route-sortBy="@Model.SortBy"
+                           asp-route-availableOnly="@Model.AvailableOnly">
                             Suivant <i class="fas fa-chevron-right"></i>
                         </a>
                     </li>

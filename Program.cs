@@ -5,32 +5,35 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-// Configuration des sessions
+// Configure Session
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromHours(2); // Session expires after 2 hours of inactivity
+    options.IdleTimeout = TimeSpan.FromMinutes(120); // 2 hours
     options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true; // Make the session cookie essential
-    options.Cookie.Name = "BookStore.Session";
+    options.Cookie.IsEssential = true;
+    options.Cookie.SameSite = SameSiteMode.Strict;
 });
 
-// Enregistrement des services personnalisés
+// Add HttpContextAccessor for sessions
 builder.Services.AddHttpContextAccessor();
 
-// Services d'authentification et utilisateurs
+// Register services with Dependency Injection
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
-
-// Services métier
 builder.Services.AddScoped<IBookService, BookService>();
 builder.Services.AddScoped<IAuthorService, AuthorService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<ILibrarianRequestService, LibrarianRequestService>();
-
-// Service de données
 builder.Services.AddScoped<IDataService, DataService>();
+
+// Add Antiforgery services
+builder.Services.AddAntiforgery(options =>
+{
+    options.HeaderName = "RequestVerificationToken";
+    options.Cookie.SameSite = SameSiteMode.Strict;
+});
 
 var app = builder.Build();
 
@@ -38,7 +41,6 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -47,47 +49,26 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// Ajouter le support des sessions AVANT UseAuthorization
+// Add Session middleware before Authorization
 app.UseSession();
-
-// Middleware personnalisé pour initialiser les données au démarrage
-app.Use(async (context, next) =>
-{
-    var dataService = context.RequestServices.GetRequiredService<IDataService>();
-    if (!await dataService.IsDataInitializedAsync())
-    {
-        await dataService.InitializeDataAsync();
-    }
-    await next();
-});
 
 app.UseAuthorization();
 
-// Routes personnalisées pour les différents contrôleurs
-app.MapControllerRoute(
-    name: "admin",
-    pattern: "Admin/{action=Index}",
-    defaults: new { controller = "Admin" });
+// Global middleware to set ViewBag data for all requests
+app.Use(async (context, next) =>
+{
+    // Initialize data if needed
+    var dataService = context.RequestServices.GetRequiredService<IDataService>();
+    await dataService.InitializeDataAsync();
 
-app.MapControllerRoute(
-    name: "account",
-    pattern: "Account/{action=Login}",
-    defaults: new { controller = "Account" });
+    await next.Invoke();
+});
 
-app.MapControllerRoute(
-    name: "books",
-    pattern: "Books/{action=Index}/{id?}",
-    defaults: new { controller = "Books" });
-
-app.MapControllerRoute(
-    name: "cart",
-    pattern: "Cart/{action=Index}",
-    defaults: new { controller = "Cart" });
-
-app.MapControllerRoute(
-    name: "orders",
-    pattern: "Orders/{action=Index}",
-    defaults: new { controller = "Orders" });
+// Add middleware to populate ViewBag with user info for layout
+app.Use(async (context, next) =>
+{
+    await next.Invoke();
+});
 
 app.MapControllerRoute(
     name: "default",

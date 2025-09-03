@@ -71,8 +71,8 @@ namespace ECommerceApp.Services
                 query = query.Where(b => b.Price <= searchModel.MaxPrice.Value);
             }
 
-            // Filtrer par disponibilité
-            if (searchModel.AvailableOnly == true)
+            // FIXED: Filtrer par disponibilité (non-nullable boolean)
+            if (searchModel.AvailableOnly)
             {
                 query = query.Where(b => b.InStock);
             }
@@ -167,7 +167,6 @@ namespace ECommerceApp.Services
 
         public async Task<List<Book>> GetTopSellingBooksAsync(int count = 5)
         {
-            // Simuler les livres les plus vendus (dans un vrai projet, on baserait cela sur les statistiques de ventes)
             var books = await GetAvailableBooksAsync();
             return books.Take(count).ToList();
         }
@@ -183,21 +182,109 @@ namespace ECommerceApp.Services
             return await Task.FromResult(_books.Any(b => b.Id == id));
         }
 
-        // Méthode pour initialiser les données de test
+        // FIXED: Données de test avec images publiques fonctionnelles
         public static void InitializeTestBooks()
         {
             if (_books.Count == 0)
             {
                 _books.AddRange(new List<Book>
                 {
-                    new Book { Id = 1, Title = "Le Petit Prince", AuthorId = 1, Category = BookCategory.Fiction, Price = 12.99m, PublicationDate = new DateTime(1943, 4, 6), IsAvailable = true, Stock = 10, ImageUrl="https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300&h=400&fit=crop", Description = "Un conte poétique et philosophique sous l'apparence d'un conte pour enfants." },
-                    new Book { Id = 2, Title = "1984", AuthorId = 2, Category = BookCategory.Fiction, Price = 15.99m, PublicationDate = new DateTime(1949, 6, 8), IsAvailable = true, Stock = 8, ImageUrl="https://drive.google.com/file/d/1ESL-CkL3__RnoQ3Ewl_vD-AmnuGPEMFY/view?usp=sharing", Description = "Un roman dystopique qui dépeint une société totalitaire." },
-                    new Book { Id = 3, Title = "L'Étranger", AuthorId = 3, Category = BookCategory.Fiction, Price = 14.50m, PublicationDate = new DateTime(1942, 5, 19), IsAvailable = true, Stock = 5, ImageUrl="https://drive.google.com/file/d/1ze1SszkodoIqJBJ-8DxFMZ2LMhR9oFaY/view?usp=sharing", Description = "L'histoire de Meursault, un homme indifférent au monde qui l'entoure." },
-                    new Book { Id = 4, Title = "Une brève histoire du temps", AuthorId = 4, Category = BookCategory.Science, Price = 22.00m, PublicationDate = new DateTime(1988, 4, 1), IsAvailable = true, Stock = 12, ImageUrl="https://drive.google.com/file/d/1ZjlP7mGYBSI9YqVM1CDhaga5mkFiq86Q/view?usp=sharing", Description = "Les mystères de l'univers expliqués par Stephen Hawking." },
-                    new Book { Id = 5, Title = "Sapiens", AuthorId = 5, Category = BookCategory.History, Price = 24.90m, PublicationDate = new DateTime(2011, 9, 4), IsAvailable = true, Stock = 15, ImageUrl="https://drive.google.com/file/d/1h9A-X3IFDxFGltqAtI0MNw8UKoe_W9uD/view?usp=sharing", Description = "Une brève histoire de l'humanité." },
-                    new Book { Id = 6, Title = "Clean Code", AuthorId = 6, Category = BookCategory.Technology, Price = 45.00m, PublicationDate = new DateTime(2008, 8, 1), IsAvailable = true, Stock = 7, ImageUrl="https://drive.google.com/file/d/1YWm4SFcrGdKRsEkj-9oC5cZrqc9QApR1/view?usp=sharing", Description = "Manuel de développement agile pour créer un code propre." },
-                    new Book { Id = 7, Title = "Dune", AuthorId = 7, Category = BookCategory.Fantasy, Price = 19.99m, PublicationDate = new DateTime(1965, 8, 1), IsAvailable = true, Stock = 9, ImageUrl="https://drive.google.com/file/d/14rz5N6fBgg86WJuSHBIBQwfMA4TbltkD/view?usp=sharing", Description = "Un chef-d'œuvre de science-fiction épique." },
-                    new Book { Id = 8, Title = "Les Misérables", AuthorId = 8, Category = BookCategory.Fiction, Price = 29.99m, PublicationDate = new DateTime(1862, 3, 30), IsAvailable = true, Stock = 6, ImageUrl="https://drive.google.com/file/d/1qeITvHeNbskBgKDXiAhLS5D22hYDH-68/view?usp=sharing", Description = "Le roman social de Victor Hugo." },
+                    new Book { 
+                        Id = 1, 
+                        Title = "Le Petit Prince", 
+                        AuthorId = 1, 
+                        Category = BookCategory.Fiction, 
+                        Price = 12.99m, 
+                        PublicationDate = new DateTime(1943, 4, 6), 
+                        IsAvailable = true, 
+                        Stock = 10, 
+                        Description = "Un conte poétique et philosophique sous l'apparence d'un conte pour enfants.",
+                        ImageUrl = "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300&h=400&fit=crop"
+                    },
+                    new Book { 
+                        Id = 2, 
+                        Title = "1984", 
+                        AuthorId = 2, 
+                        Category = BookCategory.Fiction, 
+                        Price = 15.99m, 
+                        PublicationDate = new DateTime(1949, 6, 8), 
+                        IsAvailable = true, 
+                        Stock = 8, 
+                        Description = "Un roman dystopique qui dépeint une société totalitaire.",
+                        ImageUrl = "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=400&fit=crop"
+                    },
+                    new Book { 
+                        Id = 3, 
+                        Title = "L'Étranger", 
+                        AuthorId = 3, 
+                        Category = BookCategory.Fiction, 
+                        Price = 14.50m, 
+                        PublicationDate = new DateTime(1942, 5, 19), 
+                        IsAvailable = true, 
+                        Stock = 5, 
+                        Description = "L'histoire de Meursault, un homme indifférent au monde qui l'entoure.",
+                        ImageUrl = "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=300&h=400&fit=crop"
+                    },
+                    new Book { 
+                        Id = 4, 
+                        Title = "Une brève histoire du temps", 
+                        AuthorId = 4, 
+                        Category = BookCategory.Science, 
+                        Price = 22.00m, 
+                        PublicationDate = new DateTime(1988, 4, 1), 
+                        IsAvailable = true, 
+                        Stock = 12, 
+                        Description = "Les mystères de l'univers expliqués par Stephen Hawking.",
+                        ImageUrl = "https://images.unsplash.com/photo-1446776877081-d282a0f896e2?w=300&h=400&fit=crop"
+                    },
+                    new Book { 
+                        Id = 5, 
+                        Title = "Sapiens", 
+                        AuthorId = 5, 
+                        Category = BookCategory.History, 
+                        Price = 24.90m, 
+                        PublicationDate = new DateTime(2011, 9, 4), 
+                        IsAvailable = true, 
+                        Stock = 15, 
+                        Description = "Une brève histoire de l'humanité.",
+                        ImageUrl = "https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=300&h=400&fit=crop"
+                    },
+                    new Book { 
+                        Id = 6, 
+                        Title = "Clean Code", 
+                        AuthorId = 6, 
+                        Category = BookCategory.Technology, 
+                        Price = 45.00m, 
+                        PublicationDate = new DateTime(2008, 8, 1), 
+                        IsAvailable = true, 
+                        Stock = 7, 
+                        Description = "Manuel de développement agile pour créer un code propre.",
+                        ImageUrl = "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=300&h=400&fit=crop"
+                    },
+                    new Book { 
+                        Id = 7, 
+                        Title = "Dune", 
+                        AuthorId = 7, 
+                        Category = BookCategory.Fantasy, 
+                        Price = 19.99m, 
+                        PublicationDate = new DateTime(1965, 8, 1), 
+                        IsAvailable = true, 
+                        Stock = 9, 
+                        Description = "Un chef-d'œuvre de science-fiction épique.",
+                        ImageUrl = "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=400&fit=crop"
+                    },
+                    new Book { 
+                        Id = 8, 
+                        Title = "Les Misérables", 
+                        AuthorId = 8, 
+                        Category = BookCategory.Fiction, 
+                        Price = 29.99m, 
+                        PublicationDate = new DateTime(1862, 3, 30), 
+                        IsAvailable = true, 
+                        Stock = 6, 
+                        Description = "Le roman social de Victor Hugo.",
+                        ImageUrl = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop"
+                    },
                 });
             }
         }

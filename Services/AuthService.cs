@@ -6,7 +6,6 @@ using System.Text;
 
 namespace ECommerceApp.Services
 {
-    // Services/AuthService.cs
     public class AuthService : IAuthService
     {
         private readonly IUserService _userService;
@@ -38,33 +37,67 @@ namespace ECommerceApp.Services
 
         public async Task<bool> RegisterUserAsync(RegisterViewModel model)
         {
-            // Vérifier si l'email existe déjà
-            if (await IsEmailExistsAsync(model.Email))
-                return false;
-
-            // Vérifier si le nom d'utilisateur existe déjà
-            if (await IsUsernameExistsAsync(model.Username))
-                return false;
-
-            var user = new User
+            try
             {
-                Username = model.Username,
-                Email = model.Email,
-                Password = HashPassword(model.Password),
-                FirstName = model.FirstName,
-                LastName = model.LastName,
-                Role = UserRole.User,
-                Credits = 100.00m, // Crédits de départ
-                CreatedDate = DateTime.Now,
-                IsActive = true
-            };
+                // Vérifier si l'email existe déjà
+                if (await IsEmailExistsAsync(model.Email))
+                    return false;
 
-            var users = GetUsersFromMemory();
-            user.Id = users.Count > 0 ? users.Max(u => u.Id) + 1 : 1;
-            users.Add(user);
-            SaveUsersToMemory(users);
+                // Vérifier si le nom d'utilisateur existe déjà
+                if (await IsUsernameExistsAsync(model.Username))
+                    return false;
 
-            return true;
+                // FIXED: Get the users list properly
+                var users = UserService.GetStaticUsers().ToList();
+
+                var user = new User
+                {
+                    Username = model.Username,
+                    Email = model.Email,
+                    Password = HashPassword(model.Password),
+                    FirstName = model.FirstName,
+                    LastName = model.LastName,
+                    Role = UserRole.User,
+                    Credits = 100.00m, // Crédits de départ
+                    CreatedDate = DateTime.Now,
+                    IsActive = true
+                };
+
+                user.Id = users.Count > 0 ? users.Max(u => u.Id) + 1 : 1;
+
+                // Add to the static list through UserService
+                return await AddUserToStaticList(user);
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        // HELPER METHOD: Add user to static list
+        private async Task<bool> AddUserToStaticList(User user)
+        {
+            try
+            {
+                // This is a workaround - in a real app we'd use a database
+                // We'll use reflection to access the private static list
+                var userServiceType = typeof(UserService);
+                var usersField = userServiceType.GetField("_users",
+                    System.Reflection.BindingFlags.NonPublic |
+                    System.Reflection.BindingFlags.Static);
+
+                if (usersField?.GetValue(null) is List<User> usersList)
+                {
+                    usersList.Add(user);
+                    return true;
+                }
+
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
         }
 
         public async Task<bool> LoginAsync(string email, string password)
@@ -141,23 +174,6 @@ namespace ECommerceApp.Services
             using var sha256 = SHA256.Create();
             var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password + "BookStoreSalt"));
             return Convert.ToBase64String(hashedBytes);
-        }
-
-        // Méthodes pour gérer le stockage en mémoire
-        private List<User> GetUsersFromMemory()
-        {
-            var httpContext = _httpContextAccessor.HttpContext;
-            if (httpContext?.Items["Users"] is List<User> users)
-                return users;
-
-            return new List<User>();
-        }
-
-        private void SaveUsersToMemory(List<User> users)
-        {
-            var httpContext = _httpContextAccessor.HttpContext;
-            if (httpContext != null)
-                httpContext.Items["Users"] = users;
         }
     }
 }
