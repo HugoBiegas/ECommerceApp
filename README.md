@@ -4,9 +4,9 @@
 Projet développé dans le cadre du cours **"Retail (e-commerce)"** dispensé par **Prof. Marcel Stefan Wagner, PhD** à l'**ESTIAM**.
 
 **Étudiants développeurs :**
-- [Votre nom ici]
-- [Nom du membre 2 si applicable]
-- [Nom du membre 3 si applicable]
+- Hugo Biegas
+- Naier Abassi
+- Yanne Iziglouch
 
 **Professeur :** Marcel Stefan Wagner, PhD
 
