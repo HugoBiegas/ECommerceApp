@@ -160,17 +160,6 @@
                         <div class="progress-bar bg-@(Model.Status == OrderStatus.Cancelled ? "danger" : "primary")"
                              style="width: @progressValue%"></div>
                     </div>
-                    <small class="text-muted">
-                        @Model.Status switch
-                        {
-                        OrderStatus.Pending => "Commande en attente de traitement",
-                        OrderStatus.Processing => "Commande en cours de préparation",
-                        OrderStatus.Shipped => "Commande expédiée",
-                        OrderStatus.Delivered => "Commande livrée",
-                        OrderStatus.Cancelled => "Commande annulée",
-                        _ => "Statut inconnu"
-                        }
-                    </small>
                 </div>
 
                 @if (Model.Status == OrderStatus.Delivered)
@@ -187,16 +176,6 @@
                         Commande annulée. Les crédits ont été remboursés.
                     </div>
                 }
-
-                <div class="mt-4">
-                    <h6>Besoin d'aide ?</h6>
-                    <p class="small text-muted mb-2">
-                        Contactez notre service client pour toute question concernant votre commande.
-                    </p>
-                    <button type="button" class="btn btn-outline-info btn-sm w-100">
-                        <i class="fas fa-headset me-2"></i>Contacter le support
-                    </button>
-                </div>
             </div>
         </div>
     </div>

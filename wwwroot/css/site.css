@@ -88,7 +88,7 @@ main {
 }
 
 .card-text {
-    color: #6c757d !important; /* Bootstrap muted color for descriptions */
+    color: #000000 !important; /* Bootstrap muted color for descriptions */
 }
 
 /* Book Cards - FIXED */
