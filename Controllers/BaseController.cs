@@ -40,6 +40,11 @@ namespace ECommerceApp.Controllers
                     ViewBag.CartItemsCount = await _cartService.GetCartItemsCountAsync(user.Id);
                 }
             }
+            else
+            {
+                ViewBag.UserCredits = 0;
+                ViewBag.CartItemsCount = 0;
+            }
         }
     }
 }

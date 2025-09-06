@@ -64,12 +64,6 @@ app.Use(async (context, next) =>
     await next.Invoke();
 });
 
-// Add middleware to populate ViewBag with user info for layout
-app.Use(async (context, next) =>
-{
-    await next.Invoke();
-});
-
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");

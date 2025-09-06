@@ -42,34 +42,46 @@
                                 <i class="fas fa-book me-1"></i>Catalogue
                             </a>
                         </li>
-                        <li class="nav-item" asp-role="@UserRole.Librarian">
-                            <a class="nav-link" asp-controller="Books" asp-action="Create">
-                                <i class="fas fa-plus me-1"></i>Ajouter un livre
-                            </a>
-                        </li>
-                        <li class="nav-item dropdown" asp-role="@UserRole.Admin">
+
+                        <li class="nav-item dropdown" asp-role="@UserRole.Librarian">
                             <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button"
                                data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="fas fa-cog me-1"></i>Administration
                             </a>
                             <ul class="dropdown-menu">
                                 <li>
-                                    <a class="dropdown-item" asp-controller="Admin" asp-action="Index">
+                                    <a class="dropdown-item" asp-controller="Admin" asp-action="Index" asp-role="@UserRole.Admin">
                                         <i class="fas fa-dashboard me-2"></i>Tableau de bord
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" asp-controller="Admin" asp-action="Users">
+                                    <a class="dropdown-item" asp-controller="Admin" asp-action="Users" asp-role="@UserRole.Admin">
                                         <i class="fas fa-users me-2"></i>Gestion utilisateurs
                                     </a>
                                 </li>
                                 <li>
-                                    <a class="dropdown-item" asp-controller="Admin" asp-action="Statistics">
+                                    <a class="dropdown-item" asp-controller="Authors" asp-action="">
+                                        <i class="fas fa-users me-2"></i>Gestion des autors
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Admin" asp-action="Statistics" asp-role="@UserRole.Admin">
                                         <i class="fas fa-chart-bar me-2"></i>Statistiques
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Orders" asp-action="">
+                                        <i class="fas fa-chart-bar me-2"></i>Commandes boutique
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="Books" asp-action="Create">
+                                        <i class="fas fa-dashboard me-2"></i>Ajouter un livre
                                     </a>
                                 </li>
                             </ul>
                         </li>
+
                     </ul>
 
                     <!-- Right Navigation -->
@@ -89,23 +101,12 @@
                                 </a>
                             </li>
 
-                            <!-- Orders -->
-                            <li class="nav-item">
-                                <a class="nav-link" asp-controller="Orders" asp-action="Index">
-                                    <i class="fas fa-receipt me-1"></i>Commandes
-                                </a>
-                            </li>
-
                             <!-- User Menu -->
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown"
                                    role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="fas fa-user-circle me-2"></i>
                                     <span class="me-1">@ViewBag.UserEmail</span>
-                                    @if (ViewBag.UserCredits != null)
-                                    {
-                                        <credit-display amount="@ViewBag.UserCredits" size="small" additional-class="text-warning"></credit-display>
-                                    }
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end">
                                     <li>
@@ -217,24 +218,14 @@
         <div class="container py-4">
             <div class="row">
                 <div class="col-md-6">
-                    <h5><i class="fas fa-book me-2"></i>BookStore</h5>
-                    <p class="text-muted">Votre librairie en ligne de confiance</p>
+                    <h5 class="text-light"><i class="fas fa-book me-2"></i>BookStore</h5>
+                    <p class="text-light">Votre librairie en ligne de confiance</p>
                 </div>
                 <div class="col-md-3">
-                    <h6>Liens rapides</h6>
+                    <h6 class="text-light">Liens rapides</h6>
                     <ul class="list-unstyled">
-                        <li><a href="#" class="text-light text-decoration-none">À propos</a></li>
-                        <li><a href="#" class="text-light text-decoration-none">Contact</a></li>
                         <li><a asp-controller="Home" asp-action="Privacy" class="text-light text-decoration-none">Confidentialité</a></li>
                     </ul>
-                </div>
-                <div class="col-md-3">
-                    <h6>Suivez-nous</h6>
-                    <div class="d-flex gap-2">
-                        <a href="#" class="text-light"><i class="fab fa-facebook"></i></a>
-                        <a href="#" class="text-light"><i class="fab fa-twitter"></i></a>
-                        <a href="#" class="text-light"><i class="fab fa-instagram"></i></a>
-                    </div>
                 </div>
             </div>
             <hr class="my-4">
@@ -243,7 +234,7 @@
                     <small>&copy; 2025 - BookStore - Tous droits réservés</small>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <small>Développé par Marcel Stefan Wagner, PhD</small>
+                    <small>Développé pour Marcel Stefan Wagner, PhD</small>
                 </div>
             </div>
         </div>

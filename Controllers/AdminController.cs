@@ -5,9 +5,8 @@ using ECommerceApp.Models.Enums;
 
 namespace ECommerceApp.Controllers
 {
-    public class AdminController : Controller
+    public class AdminController : BaseController
     {
-        private readonly IAuthService _authService;
         private readonly IUserService _userService;
         private readonly IBookService _bookService;
         private readonly IOrderService _orderService;
@@ -18,9 +17,10 @@ namespace ECommerceApp.Controllers
             IUserService userService,
             IBookService bookService,
             IOrderService orderService,
-            ILibrarianRequestService librarianRequestService)
+            ILibrarianRequestService librarianRequestService,
+            ICartService cartService)
+            : base(authService, cartService)
         {
-            _authService = authService;
             _userService = userService;
             _bookService = bookService;
             _orderService = orderService;
@@ -128,59 +128,6 @@ namespace ECommerceApp.Controllers
             else
             {
                 TempData["ErrorMessage"] = "Erreur lors de la mise à jour des crédits.";
-            }
-
-            return RedirectToAction("Users");
-        }
-
-        // POST: Admin/DeactivateUser
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeactivateUser(int userId)
-        {
-            if (!_authService.HasRole(UserRole.Admin))
-            {
-                return RedirectToAction("AccessDenied", "Account");
-            }
-
-            var currentUser = await _authService.GetCurrentUserAsync();
-            if (currentUser != null && currentUser.Id == userId)
-            {
-                TempData["ErrorMessage"] = "Vous ne pouvez pas désactiver votre propre compte.";
-                return RedirectToAction("Users");
-            }
-
-            var success = await _userService.DeactivateUserAsync(userId);
-            if (success)
-            {
-                TempData["SuccessMessage"] = "Utilisateur désactivé avec succès.";
-            }
-            else
-            {
-                TempData["ErrorMessage"] = "Erreur lors de la désactivation.";
-            }
-
-            return RedirectToAction("Users");
-        }
-
-        // POST: Admin/ActivateUser
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ActivateUser(int userId)
-        {
-            if (!_authService.HasRole(UserRole.Admin))
-            {
-                return RedirectToAction("AccessDenied", "Account");
-            }
-
-            var success = await _userService.ActivateUserAsync(userId);
-            if (success)
-            {
-                TempData["SuccessMessage"] = "Utilisateur activé avec succès.";
-            }
-            else
-            {
-                TempData["ErrorMessage"] = "Erreur lors de l'activation.";
             }
 
             return RedirectToAction("Users");

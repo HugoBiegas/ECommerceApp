@@ -6,19 +6,20 @@ using ECommerceApp.Models.Enums;
 
 namespace ECommerceApp.Controllers
 {
-    public class BooksController : Controller
+    public class BooksController : BaseController
     {
         private readonly IBookService _bookService;
         private readonly IAuthorService _authorService;
-        private readonly IAuthService _authService;
-        private readonly ICartService _cartService;
 
-        public BooksController(IBookService bookService, IAuthorService authorService, IAuthService authService, ICartService cartService)
+        public BooksController(
+            IBookService bookService,
+            IAuthorService authorService,
+            IAuthService authService,
+            ICartService cartService)
+            : base(authService, cartService)
         {
             _bookService = bookService;
             _authorService = authorService;
-            _authService = authService;
-            _cartService = cartService;
         }
 
         // GET: Books
@@ -34,18 +35,8 @@ namespace ECommerceApp.Controllers
             // Préparer les données pour les filtres
             ViewBag.Categories = Enum.GetValues<BookCategory>().Select(c => new { Value = (int)c, Text = c.ToString() });
 
-            // Informations utilisateur pour l'affichage
-            ViewBag.IsLoggedIn = _authService.IsLoggedIn();
+            // Additional ViewBag for Books specific
             ViewBag.CanManageBooks = _authService.HasRole(UserRole.Librarian);
-
-            if (_authService.IsLoggedIn())
-            {
-                var userId = _authService.GetCurrentUserId();
-                if (userId.HasValue)
-                {
-                    ViewBag.CartItemsCount = await _cartService.GetCartItemsCountAsync(userId.Value);
-                }
-            }
 
             return View(model);
         }
@@ -59,17 +50,7 @@ namespace ECommerceApp.Controllers
                 return NotFound();
             }
 
-            ViewBag.IsLoggedIn = _authService.IsLoggedIn();
             ViewBag.CanManageBooks = _authService.HasRole(UserRole.Librarian);
-
-            if (_authService.IsLoggedIn())
-            {
-                var userId = _authService.GetCurrentUserId();
-                if (userId.HasValue)
-                {
-                    ViewBag.CartItemsCount = await _cartService.GetCartItemsCountAsync(userId.Value);
-                }
-            }
 
             return View(book);
         }
@@ -88,7 +69,6 @@ namespace ECommerceApp.Controllers
             };
 
             ViewBag.Categories = Enum.GetValues<BookCategory>().Select(c => new { Value = (int)c, Text = c.ToString() });
-
             return View(model);
         }
 
@@ -109,27 +89,16 @@ namespace ECommerceApp.Controllers
                 return View(model);
             }
 
-            // Vérifier que l'auteur existe
-            if (!await _authorService.AuthorExistsAsync(model.AuthorId))
-            {
-                ModelState.AddModelError("AuthorId", "L'auteur sélectionné n'existe pas.");
-                model.Authors = await _authorService.GetAllAuthorsAsync();
-                ViewBag.Categories = Enum.GetValues<BookCategory>().Select(c => new { Value = (int)c, Text = c.ToString() });
-                return View(model);
-            }
-
             var book = new Book
             {
                 Title = model.Title,
-                AuthorId = model.AuthorId,
+                ISBN = model.ISBN,
                 Category = model.Category,
                 Price = model.Price,
-                PublicationDate = model.PublicationDate,
-                IsAvailable = model.IsAvailable,
-                ISBN = model.ISBN,
-                Description = model.Description,
                 Stock = model.Stock,
-                ImageUrl = model.ImageUrl
+                Description = model.Description,
+                AuthorId = model.AuthorId,
+                ImageUrl = model.ImageUrl ?? "/images/default-book.jpg"
             };
 
             var bookId = await _bookService.AddBookAsync(book);
@@ -163,20 +132,17 @@ namespace ECommerceApp.Controllers
             {
                 Id = book.Id,
                 Title = book.Title,
-                AuthorId = book.AuthorId,
+                ISBN = book.ISBN,
                 Category = book.Category,
                 Price = book.Price,
-                PublicationDate = book.PublicationDate,
-                IsAvailable = book.IsAvailable,
-                ISBN = book.ISBN,
-                Description = book.Description,
                 Stock = book.Stock,
+                Description = book.Description,
+                AuthorId = book.AuthorId,
                 ImageUrl = book.ImageUrl,
                 Authors = await _authorService.GetAllAuthorsAsync()
             };
 
             ViewBag.Categories = Enum.GetValues<BookCategory>().Select(c => new { Value = (int)c, Text = c.ToString() });
-
             return View(model);
         }
 
@@ -190,11 +156,6 @@ namespace ECommerceApp.Controllers
                 return RedirectToAction("AccessDenied", "Account");
             }
 
-            if (id != model.Id)
-            {
-                return BadRequest();
-            }
-
             if (!ModelState.IsValid)
             {
                 model.Authors = await _authorService.GetAllAuthorsAsync();
@@ -202,20 +163,20 @@ namespace ECommerceApp.Controllers
                 return View(model);
             }
 
-            var book = new Book
+            var book = await _bookService.GetBookByIdAsync(id);
+            if (book == null)
             {
-                Id = model.Id,
-                Title = model.Title,
-                AuthorId = model.AuthorId,
-                Category = model.Category,
-                Price = model.Price,
-                PublicationDate = model.PublicationDate,
-                IsAvailable = model.IsAvailable,
-                ISBN = model.ISBN,
-                Description = model.Description,
-                Stock = model.Stock,
-                ImageUrl = model.ImageUrl
-            };
+                return NotFound();
+            }
+
+            book.Title = model.Title;
+            book.ISBN = model.ISBN;
+            book.Category = model.Category;
+            book.Price = model.Price;
+            book.Stock = model.Stock;
+            book.Description = model.Description;
+            book.AuthorId = model.AuthorId;
+            book.ImageUrl = model.ImageUrl ?? book.ImageUrl;
 
             var success = await _bookService.UpdateBookAsync(book);
             if (success)

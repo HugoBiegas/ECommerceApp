@@ -5,17 +5,20 @@ using ECommerceApp.Models.Enums;
 
 namespace ECommerceApp.Controllers
 {
-    public class AuthorsController : Controller
+    public class AuthorsController : BaseController
     {
         private readonly IAuthorService _authorService;
         private readonly IBookService _bookService;
-        private readonly IAuthService _authService;
 
-        public AuthorsController(IAuthorService authorService, IBookService bookService, IAuthService authService)
+        public AuthorsController(
+            IAuthorService authorService,
+            IBookService bookService,
+            IAuthService authService,
+            ICartService cartService)
+            : base(authService, cartService)
         {
             _authorService = authorService;
             _bookService = bookService;
-            _authService = authService;
         }
 
         // GET: Authors
@@ -121,7 +124,7 @@ namespace ECommerceApp.Controllers
 
             if (id != author.Id)
             {
-                return BadRequest();
+                return NotFound();
             }
 
             if (!ModelState.IsValid)
@@ -136,7 +139,7 @@ namespace ECommerceApp.Controllers
                 return RedirectToAction("Details", new { id = author.Id });
             }
 
-            TempData["ErrorMessage"] = "Une erreur est survenue lors de la modification.";
+            TempData["ErrorMessage"] = "Une erreur est survenue lors de la modification de l'auteur.";
             return View(author);
         }
 
@@ -154,10 +157,10 @@ namespace ECommerceApp.Controllers
                 return NotFound();
             }
 
-            // Vérifier s'il y a des livres associés
+            // Vérifier si l'auteur a des livres
             var books = await _bookService.GetBooksByAuthorAsync(id);
-            ViewBag.AssociatedBooks = books;
-            ViewBag.CanDelete = books.Count == 0;
+            ViewBag.HasBooks = books.Any();
+            ViewBag.BookCount = books.Count;
 
             return View(author);
         }
@@ -172,11 +175,12 @@ namespace ECommerceApp.Controllers
                 return RedirectToAction("AccessDenied", "Account");
             }
 
-            // Vérifier encore une fois qu'on peut supprimer
-            if (!await _authorService.CanDeleteAuthorAsync(id))
+            // Vérifier si l'auteur a des livres
+            var books = await _bookService.GetBooksByAuthorAsync(id);
+            if (books.Any())
             {
                 TempData["ErrorMessage"] = "Impossible de supprimer cet auteur car il a des livres associés.";
-                return RedirectToAction("Delete", new { id });
+                return RedirectToAction("Index");
             }
 
             var success = await _authorService.DeleteAuthorAsync(id);
@@ -186,7 +190,7 @@ namespace ECommerceApp.Controllers
             }
             else
             {
-                TempData["ErrorMessage"] = "Une erreur est survenue lors de la suppression.";
+                TempData["ErrorMessage"] = "Une erreur est survenue lors de la suppression de l'auteur.";
             }
 
             return RedirectToAction("Index");

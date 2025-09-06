@@ -5,15 +5,18 @@ using ECommerceApp.Models.Enums;
 
 namespace ECommerceApp.Controllers
 {
-    public class AccountController : Controller
+    public class AccountController : BaseController
     {
-        private readonly IAuthService _authService;
         private readonly IUserService _userService;
         private readonly ILibrarianRequestService _librarianRequestService;
 
-        public AccountController(IAuthService authService, IUserService userService, ILibrarianRequestService librarianRequestService)
+        public AccountController(
+            IAuthService authService,
+            IUserService userService,
+            ILibrarianRequestService librarianRequestService,
+            ICartService cartService)
+            : base(authService, cartService)
         {
-            _authService = authService;
             _userService = userService;
             _librarianRequestService = librarianRequestService;
         }
@@ -89,10 +92,11 @@ namespace ECommerceApp.Controllers
                 return View(model);
             }
 
+            // Créer le nouvel utilisateur
             var success = await _authService.RegisterUserAsync(model);
             if (success)
             {
-                // Connecter automatiquement l'utilisateur après inscription
+                // Connexion automatique après l'inscription
                 await _authService.LoginAsync(model.Email, model.Password);
                 TempData["SuccessMessage"] = "Compte créé avec succès ! Vous avez reçu 100€ de crédits pour commencer vos achats.";
                 return RedirectToAction("Index", "Home");
@@ -164,9 +168,6 @@ namespace ECommerceApp.Controllers
                 if (await _authService.IsEmailExistsAsync(model.Email))
                 {
                     ModelState.AddModelError("Email", "Cette adresse email est déjà utilisée.");
-                    model.Role = currentUser.Role;
-                    model.Credits = currentUser.Credits;
-                    model.CreatedDate = currentUser.CreatedDate;
                     return View("Profile", model);
                 }
             }
@@ -177,14 +178,11 @@ namespace ECommerceApp.Controllers
                 if (await _authService.IsUsernameExistsAsync(model.Username))
                 {
                     ModelState.AddModelError("Username", "Ce nom d'utilisateur est déjà pris.");
-                    model.Role = currentUser.Role;
-                    model.Credits = currentUser.Credits;
-                    model.CreatedDate = currentUser.CreatedDate;
                     return View("Profile", model);
                 }
             }
 
-            // Mettre à jour les informations
+            // Mettre à jour le profil
             currentUser.Username = model.Username;
             currentUser.Email = model.Email;
             currentUser.FirstName = model.FirstName;
@@ -193,77 +191,46 @@ namespace ECommerceApp.Controllers
             var success = await _userService.UpdateUserAsync(currentUser);
             if (success)
             {
-                // Mettre à jour la session avec le nouvel email
-                HttpContext.Session.SetString("UserEmail", currentUser.Email);
                 TempData["SuccessMessage"] = "Profil mis à jour avec succès.";
+                return RedirectToAction("Profile");
+            }
+
+            ModelState.AddModelError(string.Empty, "Une erreur est survenue lors de la mise à jour du profil.");
+            return View("Profile", model);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RequestLibrarian(string reason)
+        {
+            if (!_authService.IsLoggedIn())
+            {
+                return RedirectToAction("Login");
+            }
+
+            var userId = _authService.GetCurrentUserId();
+            if (!userId.HasValue)
+            {
+                return RedirectToAction("Login");
+            }
+
+            var success = await _librarianRequestService.CreateRequestAsync(userId.Value, reason);
+
+            if (success > 0)
+            {
+                TempData["SuccessMessage"] = "Votre demande pour devenir libraire a été soumise et est en attente d'approbation.";
             }
             else
             {
-                TempData["ErrorMessage"] = "Une erreur est survenue lors de la mise à jour.";
+                TempData["ErrorMessage"] = "Une erreur est survenue ou vous avez déjà une demande en attente.";
             }
 
             return RedirectToAction("Profile");
         }
 
-        [HttpGet]
-        public async Task<IActionResult> RequestLibrarian()
-        {
-            if (!_authService.IsLoggedIn())
-            {
-                return RedirectToAction("Login");
-            }
-
-            var user = await _authService.GetCurrentUserAsync();
-            if (user == null || user.Role != UserRole.User)
-            {
-                TempData["ErrorMessage"] = "Vous ne pouvez pas faire cette demande.";
-                return RedirectToAction("Profile");
-            }
-
-            if (await _librarianRequestService.HasPendingRequestAsync(user.Id))
-            {
-                TempData["InfoMessage"] = "Vous avez déjà une demande en cours de traitement.";
-                return RedirectToAction("Profile");
-            }
-
-            return View();
-        }
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> RequestLibrarian(LibrarianRequestViewModel model)
-        {
-            if (!_authService.IsLoggedIn())
-            {
-                return RedirectToAction("Login");
-            }
-
-            var user = await _authService.GetCurrentUserAsync();
-            if (user == null || user.Role != UserRole.User)
-            {
-                TempData["ErrorMessage"] = "Vous ne pouvez pas faire cette demande.";
-                return RedirectToAction("Profile");
-            }
-
-            if (!ModelState.IsValid)
-            {
-                return View(model);
-            }
-
-            var requestId = await _librarianRequestService.CreateRequestAsync(user.Id, model.Reason);
-            if (requestId > 0)
-            {
-                TempData["SuccessMessage"] = "Votre demande a été envoyée aux administrateurs. Vous recevrez une réponse prochainement.";
-                return RedirectToAction("Profile");
-            }
-
-            TempData["ErrorMessage"] = "Une erreur est survenue lors de l'envoi de votre demande.";
-            return View(model);
-        }
-
-        [HttpGet]
         public IActionResult AccessDenied()
         {
+            TempData["ErrorMessage"] = "Vous n'avez pas les droits nécessaires pour accéder à cette page.";
             return View();
         }
     }

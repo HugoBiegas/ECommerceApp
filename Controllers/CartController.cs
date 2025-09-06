@@ -5,17 +5,17 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ECommerceApp.Controllers
 {
-    public class CartController : Controller
+    public class CartController : BaseController
     {
-        private readonly ICartService _cartService;
         private readonly IBookService _bookService;
-        private readonly IAuthService _authService;
 
-        public CartController(ICartService cartService, IBookService bookService, IAuthService authService)
+        public CartController(
+            ICartService cartService,
+            IBookService bookService,
+            IAuthService authService)
+            : base(authService, cartService)
         {
-            _cartService = cartService;
             _bookService = bookService;
-            _authService = authService;
         }
 
         // GET: Cart
