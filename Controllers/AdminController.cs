@@ -71,6 +71,10 @@ namespace ECommerceApp.Controllers
 
             ViewBag.UserRoles = Enum.GetValues<UserRole>().Select(r => new { Value = (int)r, Text = r.ToString() });
 
+            // AJOUT : Passer l'ID de l'utilisateur actuel à la vue
+            var currentUser = await _authService.GetCurrentUserAsync();
+            ViewBag.CurrentUserId = currentUser?.Id;
+
             return View(model);
         }
 
@@ -123,11 +127,83 @@ namespace ECommerceApp.Controllers
             var success = await _userService.UpdateUserCreditsAsync(userId, credits);
             if (success)
             {
-                TempData["SuccessMessage"] = "Crédits utilisateur mis à jour avec succès.";
+                TempData["SuccessMessage"] = $"Crédits utilisateur mis à jour avec succès : {credits:C}";
             }
             else
             {
                 TempData["ErrorMessage"] = "Erreur lors de la mise à jour des crédits.";
+            }
+
+            return RedirectToAction("Users");
+        }
+
+        // POST: Admin/DeactivateUser
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeactivateUser(int userId)
+        {
+            if (!_authService.HasRole(UserRole.Admin))
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
+
+            // CORRECTION : Empêcher l'auto-désactivation
+            var currentUser = await _authService.GetCurrentUserAsync();
+            if (currentUser != null && currentUser.Id == userId)
+            {
+                TempData["ErrorMessage"] = "Vous ne pouvez pas désactiver votre propre compte.";
+                return RedirectToAction("Users");
+            }
+
+            var user = await _userService.GetUserByIdAsync(userId);
+            if (user == null)
+            {
+                TempData["ErrorMessage"] = "Utilisateur introuvable.";
+                return RedirectToAction("Users");
+            }
+
+            user.IsActive = false;
+            var success = await _userService.UpdateUserAsync(user);
+
+            if (success)
+            {
+                TempData["SuccessMessage"] = $"L'utilisateur {user.Username} a été désactivé.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Erreur lors de la désactivation de l'utilisateur.";
+            }
+
+            return RedirectToAction("Users");
+        }
+
+        // POST: Admin/ActivateUser
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ActivateUser(int userId)
+        {
+            if (!_authService.HasRole(UserRole.Admin))
+            {
+                return RedirectToAction("AccessDenied", "Account");
+            }
+
+            var user = await _userService.GetUserByIdAsync(userId);
+            if (user == null)
+            {
+                TempData["ErrorMessage"] = "Utilisateur introuvable.";
+                return RedirectToAction("Users");
+            }
+
+            user.IsActive = true;
+            var success = await _userService.UpdateUserAsync(user);
+
+            if (success)
+            {
+                TempData["SuccessMessage"] = $"L'utilisateur {user.Username} a été activé.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Erreur lors de l'activation de l'utilisateur.";
             }
 
             return RedirectToAction("Users");
@@ -177,46 +253,6 @@ namespace ECommerceApp.Controllers
             }
 
             return RedirectToAction("Users");
-        }
-
-        // GET: Admin/Statistics
-        public async Task<IActionResult> Statistics()
-        {
-            if (!_authService.HasRole(UserRole.Admin))
-            {
-                return RedirectToAction("AccessDenied", "Account");
-            }
-
-            var model = new DashboardViewModel
-            {
-                TotalUsers = await _userService.GetTotalUsersCountAsync(),
-                TotalBooks = await _bookService.GetTotalBooksCountAsync(),
-                TotalOrders = await _orderService.GetTotalOrdersCountAsync(),
-                TotalRevenue = await _orderService.GetTotalRevenueAsync(),
-                TodayOrders = await _orderService.GetTodayOrdersCountAsync(),
-                TodayRevenue = await _orderService.GetTodayRevenueAsync(),
-                TopSellingBooks = await _bookService.GetTopSellingBooksAsync(10)
-            };
-
-            // Statistiques par rôle
-            var usersByRole = new Dictionary<UserRole, int>();
-            foreach (UserRole role in Enum.GetValues<UserRole>())
-            {
-                var users = await _userService.GetUsersByRoleAsync(role);
-                usersByRole[role] = users.Count;
-            }
-            ViewBag.UsersByRole = usersByRole;
-
-            // Statistiques par statut de commande
-            var ordersByStatus = new Dictionary<OrderStatus, int>();
-            foreach (OrderStatus status in Enum.GetValues<OrderStatus>())
-            {
-                var orders = await _orderService.GetOrdersByStatusAsync(status);
-                ordersByStatus[status] = orders.Count;
-            }
-            ViewBag.OrdersByStatus = ordersByStatus;
-
-            return View(model);
         }
     }
 }

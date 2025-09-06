@@ -1,5 +1,4 @@
-﻿@* Admin/Users.cshtml *@
-@model UserManagementViewModel
+﻿@model UserManagementViewModel
 @{
     ViewData["Title"] = "Gestion des Utilisateurs";
 }
@@ -104,7 +103,6 @@
                                 @if (!string.IsNullOrEmpty(user.FullName))
                                 {
                                     <br />
-                            
                                     <small class="text-muted">@user.FullName</small>
                                 }
                             </td>
@@ -157,20 +155,30 @@
 
                                     <!-- Modifier les crédits -->
                                     <button type="button" class="btn btn-outline-success btn-sm"
-                                            data-bs-toggle="modal" data-bs-target="#creditsModal@(user.Id)">
+                                            onclick="openCreditsModal(@user.Id, '@user.Username', @user.Credits.ToString("F2", System.Globalization.CultureInfo.InvariantCulture))">
                                         <i class="fas fa-coins"></i>
                                     </button>
 
                                     <!-- Activer/Désactiver -->
                                     @if (user.IsActive)
                                     {
-                                        <form method="post" asp-action="DeactivateUser" class="d-inline">
-                                            <input type="hidden" name="userId" value="@user.Id" />
-                                            <button type="submit" class="btn btn-outline-secondary btn-sm"
-                                                    onclick="return confirm('Désactiver cet utilisateur ?')">
+                                        @if (ViewBag.CurrentUserId != user.Id)
+                                        {
+                                            <form method="post" asp-action="DeactivateUser" class="d-inline">
+                                                <input type="hidden" name="userId" value="@user.Id" />
+                                                <button type="submit" class="btn btn-outline-secondary btn-sm"
+                                                        onclick="return confirm('Désactiver cet utilisateur ?')">
+                                                    <i class="fas fa-user-slash"></i>
+                                                </button>
+                                            </form>
+                                        }
+                                        else
+                                        {
+                                            <button type="button" class="btn btn-outline-secondary btn-sm" disabled
+                                                    title="Vous ne pouvez pas vous désactiver vous-même">
                                                 <i class="fas fa-user-slash"></i>
                                             </button>
-                                        </form>
+                                        }
                                     }
                                     else
                                     {
@@ -182,45 +190,6 @@
                                         </form>
                                     }
                                 </div>
-
-                                <!-- Modal pour modifier les crédits -->
-                                <div class="modal fade" id="creditsModal@(user.Id)" tabindex="-1" aria-hidden="true">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Modifier les crédits de @user.Username</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <form method="post" asp-action="UpdateUserCredits">
-                                                <div class="modal-body">
-                                                    <input type="hidden" name="userId" value="@user.Id" />
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Crédits actuels</label>
-                                                        <div class="form-control-plaintext">
-                                                            <credit-display amount="@user.Credits"></credit-display>
-                                                        </div>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Nouveaux crédits</label>
-                                                        <div class="input-group">
-                                                            <span class="input-group-text">€</span>
-                                                            <input type="number" name="credits" class="form-control"
-                                                                   value="@user.Credits" min="0" step="0.01" />
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                                                        Annuler
-                                                    </button>
-                                                    <button type="submit" class="btn btn-primary">
-                                                        <i class="fas fa-save me-2"></i>Sauvegarder
-                                                    </button>
-                                                </div>
-                                            </form>
-                                        </div>
-                                    </div>
-                                </div>
                             </td>
                         </tr>
                     }
@@ -229,3 +198,88 @@
         </div>
     </div>
 </div>
+
+<!-- Modal unique pour modifier les crédits -->
+<div class="modal fade" id="creditsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="creditsModalTitle">Modifier les crédits</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="post" asp-action="UpdateUserCredits" id="creditsForm">
+                <div class="modal-body">
+                    <input type="hidden" name="userId" id="modalUserId" value="" />
+                    <div class="mb-3">
+                        <label class="form-label">Crédits actuels</label>
+                        <div class="form-control-plaintext">
+                            <span id="currentCreditsDisplay"></span>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="modalCreditsInput" class="form-label">Nouveaux crédits</label>
+                        <div class="input-group">
+                            <span class="input-group-text">€</span>
+                            <input type="number" name="credits" id="modalCreditsInput" class="form-control"
+                                   min="0" step="0.01" required />
+                        </div>
+                        <small class="form-text text-muted">Entrez le nouveau montant total de crédits</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        Annuler
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Sauvegarder
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Fonction pour ouvrir le modal avec les bonnes valeurs
+        function openCreditsModal(userId, username, currentCredits) {
+            // Réinitialiser le formulaire
+            document.getElementById('creditsForm').reset();
+
+            // Définir les valeurs
+            document.getElementById('modalUserId').value = userId;
+            document.getElementById('creditsModalTitle').textContent = 'Modifier les crédits de ' + username;
+            document.getElementById('currentCreditsDisplay').innerHTML = '€ ' + parseFloat(currentCredits).toFixed(2);
+            document.getElementById('modalCreditsInput').value = currentCredits;
+
+            // Ouvrir le modal
+            var modal = new bootstrap.Modal(document.getElementById('creditsModal'));
+            modal.show();
+        }
+
+        // Validation du formulaire avant soumission
+        document.getElementById('creditsForm').addEventListener('submit', function(e) {
+            var creditsInput = document.getElementById('modalCreditsInput');
+            var value = parseFloat(creditsInput.value);
+
+            if (isNaN(value) || value < 0) {
+                e.preventDefault();
+                alert('Veuillez entrer un montant valide (minimum 0)');
+                return false;
+            }
+
+            // Formater à 2 décimales
+            creditsInput.value = value.toFixed(2);
+        });
+
+        // Fermer le modal proprement quand on appuie sur Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                var modal = bootstrap.Modal.getInstance(document.getElementById('creditsModal'));
+                if (modal) {
+                    modal.hide();
+                }
+            }
+        });
+    </script>
+}

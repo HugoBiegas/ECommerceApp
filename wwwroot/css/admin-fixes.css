@@ -1,0 +1,143 @@
+﻿/* Corrections pour les modals dans la page Admin/Users */
+
+/* Fix pour empêcher le clignotement du modal */
+.modal {
+    transition: opacity 0.15s linear;
+}
+
+    .modal.fade .modal-dialog {
+        transition: transform 0.3s ease-out;
+    }
+
+/* S'assurer que le modal est au-dessus de tout */
+.modal-backdrop {
+    z-index: 1040 !important;
+}
+
+.modal {
+    z-index: 1050 !important;
+}
+
+/* Fix pour les inputs dans les modals */
+.modal-body input[type="number"] {
+    -moz-appearance: textfield; /* Firefox */
+}
+
+    .modal-body input[type="number"]::-webkit-outer-spin-button,
+    .modal-body input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+/* Améliorer l'apparence des inputs de crédits */
+.modal-body .input-group {
+    position: relative;
+}
+
+    .modal-body .input-group .form-control {
+        padding-right: 3rem;
+    }
+
+/* Fix pour les dropdowns dans les boutons */
+.btn-group .dropdown-menu {
+    z-index: 1060;
+    min-width: 200px;
+}
+
+/* Améliorer la visibilité des boutons désactivés */
+button[disabled] {
+    opacity: 0.5;
+    cursor: not-allowed !important;
+}
+
+/* Fix pour les tables responsives */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Améliorer l'alignement des boutons d'action */
+.btn-group-sm > .btn {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+}
+
+/* S'assurer que les modals se ferment correctement */
+.modal.show {
+    display: block !important;
+}
+
+.modal.fade:not(.show) {
+    display: none !important;
+}
+
+/* Fix pour les formulaires dans les dropdowns */
+.dropdown-menu form {
+    margin: 0;
+}
+
+.dropdown-menu .dropdown-item {
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 0.25rem 1.5rem;
+}
+
+    .dropdown-menu .dropdown-item:hover {
+        background-color: #f8f9fa;
+    }
+
+/* Animation plus fluide pour les modals */
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.modal.show .modal-dialog {
+    animation: modalFadeIn 0.3s ease-out;
+}
+
+/* Fix pour le focus dans les modals */
+.modal-body input:focus {
+    outline: none;
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+/* Améliorer la lisibilité des labels */
+.modal-body .form-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: #495057;
+}
+
+/* Style pour les messages d'aide */
+.modal-body .form-text {
+    font-size: 0.875em;
+    margin-top: 0.25rem;
+}
+
+/* Fix pour les boutons de fermeture */
+.modal-header .btn-close {
+    padding: 0.5rem;
+    margin: -0.5rem -0.5rem -0.5rem auto;
+}
+
+/* Améliorer l'espacement dans les modals */
+.modal-body {
+    padding: 1.5rem;
+}
+
+.modal-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #dee2e6;
+}

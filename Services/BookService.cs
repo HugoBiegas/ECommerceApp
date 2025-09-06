@@ -199,7 +199,7 @@ namespace ECommerceApp.Services
                         IsAvailable = true, 
                         Stock = 10, 
                         Description = "Un conte poétique et philosophique sous l'apparence d'un conte pour enfants.",
-                        ImageUrl = "https://images.unsplash.com/photo-1544947950-fa07a98d237f?w=300&h=400&fit=crop"
+                        ImageUrl = "https://imgur.com/9MmtWhv.jpg"
                     },
                     new Book { 
                         Id = 2, 
@@ -211,7 +211,7 @@ namespace ECommerceApp.Services
                         IsAvailable = true, 
                         Stock = 8, 
                         Description = "Un roman dystopique qui dépeint une société totalitaire.",
-                        ImageUrl = "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=300&h=400&fit=crop"
+                        ImageUrl = "https://imgur.com/zXTnnFW.jpg"
                     },
                     new Book { 
                         Id = 3, 
@@ -223,7 +223,7 @@ namespace ECommerceApp.Services
                         IsAvailable = true, 
                         Stock = 5, 
                         Description = "L'histoire de Meursault, un homme indifférent au monde qui l'entoure.",
-                        ImageUrl = "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=300&h=400&fit=crop"
+                        ImageUrl = "https://imgur.com/POrWYJ9.jpg"
                     },
                     new Book { 
                         Id = 4, 
@@ -235,7 +235,7 @@ namespace ECommerceApp.Services
                         IsAvailable = true, 
                         Stock = 12, 
                         Description = "Les mystères de l'univers expliqués par Stephen Hawking.",
-                        ImageUrl = "https://images.unsplash.com/photo-1446776877081-d282a0f896e2?w=300&h=400&fit=crop"
+                        ImageUrl = "https://imgur.com/GKBgeCl.jpg"
                     },
                     new Book { 
                         Id = 5, 
@@ -247,7 +247,7 @@ namespace ECommerceApp.Services
                         IsAvailable = true, 
                         Stock = 15, 
                         Description = "Une brève histoire de l'humanité.",
-                        ImageUrl = "https://images.unsplash.com/photo-1553729459-efe14ef6055d?w=300&h=400&fit=crop"
+                        ImageUrl = "https://imgur.com/6ZGHoRW.jpg"
                     },
                     new Book { 
                         Id = 6, 
@@ -259,7 +259,7 @@ namespace ECommerceApp.Services
                         IsAvailable = true, 
                         Stock = 7, 
                         Description = "Manuel de développement agile pour créer un code propre.",
-                        ImageUrl = "https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=300&h=400&fit=crop"
+                        ImageUrl = "https://imgur.com/OQTLCkS.jpg"
                     },
                     new Book { 
                         Id = 7, 
@@ -271,7 +271,7 @@ namespace ECommerceApp.Services
                         IsAvailable = true, 
                         Stock = 9, 
                         Description = "Un chef-d'œuvre de science-fiction épique.",
-                        ImageUrl = "https://images.unsplash.com/photo-1518709268805-4e9042af2176?w=300&h=400&fit=crop"
+                        ImageUrl = "https://imgur.com/SDAkaDu.jpg"
                     },
                     new Book { 
                         Id = 8, 
@@ -283,7 +283,7 @@ namespace ECommerceApp.Services
                         IsAvailable = true, 
                         Stock = 6, 
                         Description = "Le roman social de Victor Hugo.",
-                        ImageUrl = "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop"
+                        ImageUrl = "https://imgur.com/Tz9nNGS.jpg"
                     },
                 });
             }
