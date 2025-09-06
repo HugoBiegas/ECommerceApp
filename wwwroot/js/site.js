@@ -1,4 +1,4 @@
-﻿// Enhanced JavaScript for BookStore - FIXED VERSION
+﻿// Enhanced JavaScript for BookStore - CORRECTED COMPLETE VERSION
 // Site-wide functionality
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -21,9 +21,9 @@ function initializeToasts() {
     });
 }
 
-// Cart Functionality - FIXED
+// Cart Functionality - CORRECTED
 function initializeCartFunctionality() {
-    // Add to cart buttons - FIXED to prevent double events
+    // Add to cart buttons - CORRECTED to prevent double events
     document.querySelectorAll('.add-to-cart-btn').forEach(button => {
         // Remove any existing event listeners
         button.replaceWith(button.cloneNode(true));
@@ -36,8 +36,17 @@ function initializeCartFunctionality() {
             e.stopPropagation();
 
             const bookId = this.dataset.bookId;
-            const quantityInput = this.closest('.card-body')?.querySelector('input[name="quantity"]');
-            const quantity = quantityInput ? quantityInput.value : 1;
+
+            // CORRECTED: Find quantity input - multiple possible locations
+            let quantityInput = this.closest('.card-body')?.querySelector('input[name="quantity"]');
+            if (!quantityInput) {
+                quantityInput = this.closest('.input-group')?.querySelector('input[name="quantity"]');
+            }
+            if (!quantityInput) {
+                quantityInput = document.querySelector(`#quantity-${bookId}`);
+            }
+
+            const quantity = quantityInput ? parseInt(quantityInput.value) || 1 : 1;
 
             addToCart(bookId, quantity, this);
         });
@@ -179,7 +188,7 @@ function initializeFormValidations() {
     });
 }
 
-// Cart API Functions - IMPROVED
+// Cart API Functions - CORRECTED
 async function addToCart(bookId, quantity, buttonElement) {
     // Prevent multiple clicks
     if (buttonElement.disabled) return;
@@ -206,7 +215,7 @@ async function addToCart(bookId, quantity, buttonElement) {
         const data = await response.json();
 
         if (data.success) {
-            // Update cart count in navbar
+            // CORRECTED: Update cart count in navbar
             updateNavbarCartCount(data.cartCount);
 
             // Show success feedback - FIXED: Only one toast
@@ -331,26 +340,58 @@ function updateCartTotals(newTotal, newItemsCount) {
     });
 }
 
+// CORRECTED: Update navbar cart count
 function updateNavbarCartCount(count) {
-    const cartBadge = document.querySelector('.navbar .badge');
-    const cartLink = document.querySelector('.navbar .fa-shopping-cart').closest('a');
+    // Find the cart link - multiple possible selectors
+    let cartLink = document.querySelector('.navbar .fa-shopping-cart');
+    if (!cartLink) {
+        cartLink = document.querySelector('a[href*="/Cart"]');
+    }
+
+    if (!cartLink) {
+        console.error('Cart link not found in navbar');
+        return;
+    }
+
+    // Get the parent link element
+    const cartLinkElement = cartLink.closest('a');
+    if (!cartLinkElement) {
+        console.error('Cart link parent not found');
+        return;
+    }
+
+    // Find existing badge
+    let cartBadge = cartLinkElement.querySelector('.badge');
 
     if (count > 0) {
         if (cartBadge) {
+            // Update existing badge
             cartBadge.textContent = count;
-            // Animate badge
-            cartBadge.style.animation = 'bounce 0.5s ease';
-            setTimeout(() => cartBadge.style.animation = '', 500);
+            // Add animation
+            cartBadge.style.animation = 'none';
+            setTimeout(() => {
+                cartBadge.style.animation = 'bounce 0.5s ease';
+            }, 10);
+            setTimeout(() => {
+                cartBadge.style.animation = '';
+            }, 500);
         } else {
-            // Create badge
-            const badge = document.createElement('span');
-            badge.className = 'position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger';
-            badge.textContent = count;
-            cartLink.appendChild(badge);
+            // Create new badge
+            cartBadge = document.createElement('span');
+            cartBadge.className = 'position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger';
+            cartBadge.textContent = count;
+            cartBadge.style.fontSize = '0.75rem';
+
+            // Make the cart link position relative for absolute positioning of badge
+            cartLinkElement.style.position = 'relative';
+            cartLinkElement.appendChild(cartBadge);
+
+            console.log(`Created cart badge with count: ${count}`);
         }
     } else {
         if (cartBadge) {
             cartBadge.remove();
+            console.log('Removed cart badge');
         }
     }
 }
@@ -643,3 +684,35 @@ document.querySelectorAll('form').forEach(form => {
         });
     }
 });
+
+// CSS Animation for badge bounce
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes bounce {
+        0%, 20%, 60%, 100% {
+            transform: translateY(0) translateX(-50%);
+        }
+        40% {
+            transform: translateY(-10px) translateX(-50%);
+        }
+        80% {
+            transform: translateY(-5px) translateX(-50%);
+        }
+    }
+    
+    .animate-fade-in-up {
+        animation: fadeInUp 0.6s ease forwards;
+    }
+    
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+`;
+document.head.appendChild(style);

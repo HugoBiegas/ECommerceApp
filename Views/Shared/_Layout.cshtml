@@ -14,6 +14,9 @@
     <link rel="stylesheet" href="~/ECommerceApp.styles.css" asp-append-version="true" />
 </head>
 <body>
+    <!-- CORRECTION: Ajout du token anti-forgery pour les appels AJAX -->
+    @Html.AntiForgeryToken()
+
     <header>
         <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow">
             <div class="container">
@@ -43,45 +46,55 @@
                             </a>
                         </li>
 
-                        <li class="nav-item dropdown" asp-role="@UserRole.Librarian">
-                            <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button"
-                               data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-cog me-1"></i>Administration
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li>
-                                    <a class="dropdown-item" asp-controller="Admin" asp-action="Index" asp-role="@UserRole.Admin">
-                                        <i class="fas fa-dashboard me-2"></i>Tableau de bord
+                        @if (ViewBag.IsLoggedIn == true && ViewBag.UserRole != null)
+                        {
+                            @if (ViewBag.UserRole >= ECommerceApp.Models.Enums.UserRole.Librarian)
+                            {
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" id="managementDropdown" role="button"
+                                       data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-cogs me-1"></i>Gestion
                                     </a>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Authors" asp-action="Index">
+                                                <i class="fas fa-users me-2"></i>Auteurs
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Books" asp-action="Index">
+                                                <i class="fas fa-book me-2"></i>Livres
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Orders" asp-action="Index">
+                                                <i class="fas fa-shopping-bag me-2"></i>Commandes
+                                            </a>
+                                        </li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Authors" asp-action="Create">
+                                                <i class="fas fa-user-plus me-2"></i>Ajouter un auteur
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Books" asp-action="Create">
+                                                <i class="fas fa-dashboard me-2"></i>Ajouter un livre
+                                            </a>
+                                        </li>
+                                    </ul>
                                 </li>
-                                <li>
-                                    <a class="dropdown-item" asp-controller="Admin" asp-action="Users" asp-role="@UserRole.Admin">
-                                        <i class="fas fa-users me-2"></i>Gestion utilisateurs
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" asp-controller="Authors" asp-action="">
-                                        <i class="fas fa-users me-2"></i>Gestion des autors
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" asp-controller="Admin" asp-action="Statistics" asp-role="@UserRole.Admin">
-                                        <i class="fas fa-chart-bar me-2"></i>Statistiques
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" asp-controller="Orders" asp-action="">
-                                        <i class="fas fa-chart-bar me-2"></i>Commandes boutique
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" asp-controller="Books" asp-action="Create">
-                                        <i class="fas fa-dashboard me-2"></i>Ajouter un livre
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
+                            }
 
+                            @if (ViewBag.UserRole == ECommerceApp.Models.Enums.UserRole.Admin)
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link" asp-controller="Admin" asp-action="Index">
+                                        <i class="fas fa-shield-alt me-1"></i>Administration
+                                    </a>
+                                </li>
+                            }
+                        }
                     </ul>
 
                     <!-- Right Navigation -->
@@ -113,7 +126,8 @@
                                         <h6 class="dropdown-header d-flex align-items-center">
                                             @if (ViewBag.UserRole != null)
                                             {
-                                                <role-badge role="@Enum.Parse<UserRole>(ViewBag.UserRole.ToString())"></role-badge>
+                                                <i class="fas fa-user-tag me-2"></i>
+                                                <span>@ViewBag.UserRole</span>
                                             }
                                         </h6>
                                     </li>
@@ -125,16 +139,23 @@
                                     </li>
                                     <li>
                                         <a class="dropdown-item" asp-controller="Orders" asp-action="Index">
-                                            <i class="fas fa-history me-2"></i>Mes Commandes
+                                            <i class="fas fa-shopping-bag me-2"></i>Mes Commandes
                                         </a>
                                     </li>
+                                    @if (ViewBag.UserRole == ECommerceApp.Models.Enums.UserRole.User)
+                                    {
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Account" asp-action="RequestLibrarian">
+                                                <i class="fas fa-arrow-up me-2"></i>Devenir Libraire
+                                            </a>
+                                        </li>
+                                    }
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
-                                        <form method="post" asp-controller="Account" asp-action="Logout" class="d-inline">
-                                            <button type="submit" class="dropdown-item">
-                                                <i class="fas fa-sign-out-alt me-2"></i>Déconnexion
-                                            </button>
-                                        </form>
+                                        <a class="dropdown-item" asp-controller="Account" asp-action="Logout">
+                                            <i class="fas fa-sign-out-alt me-2"></i>Déconnexion
+                                        </a>
                                     </li>
                                 </ul>
                             </li>
@@ -158,12 +179,12 @@
         </nav>
     </header>
 
-    <main role="main" class="flex-shrink-0">
-        <!-- Messages Toast -->
+    <main role="main">
+        <!-- Toast Messages -->
         @if (TempData["SuccessMessage"] != null)
         {
             <div class="toast-container position-fixed top-0 end-0 p-3">
-                <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast show" role="alert">
                     <div class="toast-header bg-success text-white">
                         <i class="fas fa-check-circle me-2"></i>
                         <strong class="me-auto">Succès</strong>
@@ -179,9 +200,9 @@
         @if (TempData["ErrorMessage"] != null)
         {
             <div class="toast-container position-fixed top-0 end-0 p-3">
-                <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast show" role="alert">
                     <div class="toast-header bg-danger text-white">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <i class="fas fa-exclamation-circle me-2"></i>
                         <strong class="me-auto">Erreur</strong>
                         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
                     </div>
@@ -195,7 +216,7 @@
         @if (TempData["InfoMessage"] != null)
         {
             <div class="toast-container position-fixed top-0 end-0 p-3">
-                <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="toast show" role="alert">
                     <div class="toast-header bg-info text-white">
                         <i class="fas fa-info-circle me-2"></i>
                         <strong class="me-auto">Information</strong>
@@ -245,7 +266,6 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 
-    <!-- The cart functionality is now handled entirely in site.js -->
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
