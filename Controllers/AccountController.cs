@@ -106,9 +106,19 @@ namespace ECommerceApp.Controllers
             return View(model);
         }
 
+        // GET: Account/Logout
+        [HttpGet]
+        public async Task<IActionResult> Logout()
+        {
+            await _authService.LogoutAsync();
+            TempData["InfoMessage"] = "Vous avez été déconnecté avec succès.";
+            return RedirectToAction("Index", "Home");
+        }
+
+        // POST: Account/Logout
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Logout()
+        public async Task<IActionResult> LogoutPost()
         {
             await _authService.LogoutAsync();
             TempData["InfoMessage"] = "Vous avez été déconnecté avec succès.";
@@ -199,6 +209,46 @@ namespace ECommerceApp.Controllers
             return View("Profile", model);
         }
 
+        // GET: Account/RequestLibrarian
+        [HttpGet]
+        public async Task<IActionResult> RequestLibrarian()
+        {
+            if (!_authService.IsLoggedIn())
+            {
+                return RedirectToAction("Login");
+            }
+
+            var userId = _authService.GetCurrentUserId();
+            if (!userId.HasValue)
+            {
+                return RedirectToAction("Login");
+            }
+
+            var currentUser = await _authService.GetCurrentUserAsync();
+            if (currentUser == null)
+            {
+                return RedirectToAction("Login");
+            }
+
+            // Vérifier que l'utilisateur est bien un User (pas déjà Librarian ou Admin)
+            if (currentUser.Role != UserRole.User)
+            {
+                TempData["ErrorMessage"] = "Seuls les utilisateurs standard peuvent demander à devenir libraire.";
+                return RedirectToAction("Profile");
+            }
+
+            // Vérifier s'il n'y a pas déjà une demande en attente
+            var hasPendingRequest = await _librarianRequestService.HasPendingRequestAsync(userId.Value);
+            if (hasPendingRequest)
+            {
+                TempData["ErrorMessage"] = "Vous avez déjà une demande de libraire en attente.";
+                return RedirectToAction("Profile");
+            }
+
+            return View(new LibrarianRequestViewModel());
+        }
+        
+        // POST: Account/RequestLibrarian
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> RequestLibrarian(string reason)

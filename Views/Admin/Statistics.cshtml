@@ -59,11 +59,11 @@
     </div>
 </div>
 
-<!-- Répartition par rôles -->
-<div class="row mb-4">
+<!-- Répartition par rôles et statuts -->
+<div class="row mb-5">
     <div class="col-md-6">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header bg-primary text-white">
                 <h5 class="mb-0 text-white">
                     <i class="fas fa-user-friends me-2"></i>Répartition des Utilisateurs par Rôle
                 </h5>
@@ -92,6 +92,13 @@
                         </div>
                     }
                 }
+                else
+                {
+                    <div class="text-center text-muted py-3">
+                        <i class="fas fa-users fa-2x mb-2"></i>
+                        <p>Aucune donnée disponible</p>
+                    </div>
+                }
             </div>
         </div>
     </div>
@@ -99,57 +106,77 @@
     <!-- Répartition par statut de commande -->
     <div class="col-md-6">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header bg-primary text-white">
                 <h5 class="mb-0 text-white">
                     <i class="fas fa-clipboard-list me-2"></i>Commandes par Statut
                 </h5>
             </div>
             <div class="card-body">
-                @if (ViewBag.OrdersByStatus != null)
-                {
-                    @foreach (var statusGroup in ViewBag.OrdersByStatus)
-                    {
-                        var status = (OrderStatus)statusGroup.Key;
-                        var count = statusGroup.Value;
-                        var percentage = Model.TotalOrders > 0 ? (count * 100.0 / Model.TotalOrders) : 0;
+                @{
+                    // Définir l'ordre d'affichage des statuts
+                    var statusOrder = new[] {
+                                OrderStatus.Pending,
+                                OrderStatus.Processing,
+                                OrderStatus.Shipped,
+                                OrderStatus.Delivered,
+                                OrderStatus.Cancelled
+                                };
+                }
 
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <span>
-                                    <order-status status="@status"></order-status>
-                                    <span class="ms-2">@count commande(s)</span>
-                                </span>
-                                <small class="text-muted">@percentage.ToString("F1")%</small>
-                            </div>
-                            <div class="progress" style="height: 6px;">
-                                @{
-                                    var progressColor = status switch
-                                    {
-                                        OrderStatus.Delivered => "success",
-                                        OrderStatus.Shipped => "primary",
-                                        OrderStatus.Processing => "info",
-                                        OrderStatus.Pending => "warning",
-                                        OrderStatus.Cancelled => "danger",
-                                        _ => "secondary"
-                                    };
-                                }
-                                <div class="progress-bar bg-@progressColor" style="width: @percentage%"></div>
-                            </div>
+                @foreach (var status in statusOrder)
+                {
+                    var count = ViewBag.OrdersByStatus != null && ((Dictionary<int, int>)ViewBag.OrdersByStatus).ContainsKey((int)status)
+                    ? ((Dictionary<int, int>)ViewBag.OrdersByStatus)[(int)status]
+                    : 0;
+                    var percentage = Model.TotalOrders > 0 ? (count * 100.0 / Model.TotalOrders) : 0;
+
+                    var progressColor = status switch
+                    {
+                        OrderStatus.Pending => "warning",
+                        OrderStatus.Processing => "info",
+                        OrderStatus.Shipped => "primary",
+                        OrderStatus.Delivered => "success",
+                        OrderStatus.Cancelled => "danger",
+                        _ => "secondary"
+                    };
+
+                    var statusLabel = status switch
+                    {
+                        OrderStatus.Pending => "En attente",
+                        OrderStatus.Processing => "En traitement",
+                        OrderStatus.Shipped => "Expédiée",
+                        OrderStatus.Delivered => "Livrée",
+                        OrderStatus.Cancelled => "Annulée",
+                        _ => status.ToString()
+                    };
+
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span>
+                                <order-status status="@status"></order-status>
+                                <span class="ms-2">@count commande(s)</span>
+                            </span>
+                            <small class="text-muted">@percentage.ToString("F1")%</small>
                         </div>
-                    }
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-@progressColor"
+                                 style="width: @Math.Max(percentage, 1)%"
+                                 title="@statusLabel : @count commande(s) (@percentage.ToString("F1")%)"></div>
+                        </div>
+                    </div>
                 }
             </div>
         </div>
     </div>
 </div>
 
-<!-- Top livres -->
-<div class="row">
+<!-- Top 10 des Livres les Plus Populaires -->
+<div class="row mb-5">
     <div class="col-12">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header bg-primary text-white">
                 <h5 class="mb-0 text-white">
-                    <i class="fas fa-trophy me-2"></i>Top 10 des Livres les Plus Populaires
+                    <i class="fas fa-star me-2"></i>Top 10 des Livres les Plus Populaires
                 </h5>
             </div>
             <div class="card-body">
@@ -185,17 +212,27 @@
                                         </td>
                                         <td>
                                             <div class="d-flex align-items-center">
-                                                <img src="@(book.ImageUrl ?? "/images/book-placeholder.jpg")"
-                                                     class="rounded me-2" alt="@book.Title"
-                                                     style="width: 40px; height: 50px; object-fit: cover;" />
-                                                <strong>@book.Title</strong>
+                                                <img src="@(book.ImageUrl ?? "/images/default-book.jpg")"
+                                                     alt="@book.Title"
+                                                     class="me-3"
+                                                     style="width: 40px; height: 60px; object-fit: cover;" />
+                                                <div>
+                                                    <h6 class="mb-0">@book.Title</h6>
+                                                    <small class="text-muted">ISBN: @book.ISBN</small>
+                                                </div>
                                             </div>
                                         </td>
-                                        <td>@book.Author?.Name</td>
-                                        <td><category-badge category="@book.Category"></category-badge></td>
-                                        <td><price-display price="@book.Price" size="small"></price-display></td>
+                                        <td>@book.Author</td>
                                         <td>
-                                            <stock-indicator stock="@book.Stock" is-available="@book.IsAvailable"></stock-indicator>
+                                            <span class="badge bg-secondary">@book.Category</span>
+                                        </td>
+                                        <td>
+                                            <price-display price="@book.Price" size="small"></price-display>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-@(book.Stock > 10 ? "success" : book.Stock > 0 ? "warning" : "danger")">
+                                                @book.Stock
+                                            </span>
                                         </td>
                                         <td>
                                             <a asp-controller="Books" asp-action="Details" asp-route-id="@book.Id"
@@ -211,10 +248,97 @@
                 }
                 else
                 {
-                    <div class="text-center py-4">
-                        <i class="fas fa-chart-bar fa-3x text-muted mb-3"></i>
-                        <h5 class="text-muted">Aucune donnée de vente disponible</h5>
-                        <p class="text-muted">Les statistiques apparaîtront après les premières commandes.</p>
+                    <div class="text-center text-muted py-5">
+                        <i class="fas fa-book fa-4x mb-3"></i>
+                        <h5>Aucun livre populaire</h5>
+                        <p>Les statistiques de vente apparaîtront ici une fois que des commandes seront passées.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Activité récente -->
+<div class="row mb-5">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0 text-white">
+                    <i class="fas fa-clock me-2"></i>Commandes Récentes
+                </h5>
+            </div>
+            <div class="card-body">
+                @if (Model.RecentOrders.Any())
+                {
+                    @foreach (var order in Model.RecentOrders)
+                    {
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h6 class="mb-1">Commande #@order.Id</h6>
+                                <small class="text-muted">@order.CustomerName</small>
+                            </div>
+                            <div class="text-end">
+                                <order-status status="@order.Status"></order-status>
+                                <br />
+                                <small class="text-muted">@order.OrderDate.ToString("dd/MM/yyyy")</small>
+                            </div>
+                        </div>
+                        <hr />
+                    }
+                    <div class="text-center">
+                        <a asp-controller="Orders" asp-action="Index" class="btn btn-sm btn-outline-primary">
+                            Voir toutes les commandes
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center text-muted py-3">
+                        <i class="fas fa-shopping-bag fa-2x mb-2"></i>
+                        <p>Aucune commande récente</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0 text-white">
+                    <i class="fas fa-user-plus me-2"></i>Nouveaux Utilisateurs
+                </h5>
+            </div>
+            <div class="card-body">
+                @if (Model.RecentUsers.Any())
+                {
+                    @foreach (var user in Model.RecentUsers)
+                    {
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h6 class="mb-1">@user.Username</h6>
+                                <small class="text-muted">@user.Email</small>
+                            </div>
+                            <div class="text-end">
+                                <role-badge role="@user.Role"></role-badge>
+                                <br />
+                                <small class="text-muted">@user.CreatedDate.ToString("dd/MM/yyyy")</small>
+                            </div>
+                        </div>
+                        <hr />
+                    }
+                    <div class="text-center">
+                        <a asp-action="Users" class="btn btn-sm btn-outline-primary">
+                            Gérer les utilisateurs
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center text-muted py-3">
+                        <i class="fas fa-users fa-2x mb-2"></i>
+                        <p>Aucun nouvel utilisateur</p>
                     </div>
                 }
             </div>

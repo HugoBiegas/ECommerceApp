@@ -91,9 +91,11 @@
                         <i class="fas fa-arrow-left me-2"></i>Retour aux commandes
                     </a>
 
-                    @if (Model.Status == OrderStatus.Pending || Model.Status == OrderStatus.Processing)
+                    @* Bouton d'annulation pour les utilisateurs normaux *@
+                    @if (!ViewBag.IsLibrarianOrAdmin && (Model.Status == OrderStatus.Pending || Model.Status == OrderStatus.Processing))
                     {
-                        <form method="post" asp-action="Cancel" asp-route-orderId="@Model.Id" class="d-inline">
+                        <form method="post" asp-action="Cancel" asp-route-id="@Model.Id" class="d-inline">
+                            @Html.AntiForgeryToken()
                             <button type="submit" class="btn btn-outline-danger"
                                     onclick="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?')">
                                 <i class="fas fa-ban me-2"></i>Annuler la commande
@@ -103,30 +105,121 @@
                 </div>
 
                 <!-- Gestion du statut (Libraires/Admins) -->
-                @if (ViewBag.CanManageOrders == true && Model.Status != OrderStatus.Cancelled)
+                @if (ViewBag.CanManageOrders == true)
                 {
                     <hr />
                     <div class="card bg-light">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-cog me-2"></i>Gestion Administrative de la Commande
+                            </h6>
+                        </div>
                         <div class="card-body">
-                            <h6><i class="fas fa-cog me-2"></i>Gestion de la commande</h6>
-                            <form method="post" asp-action="UpdateStatus" class="d-flex gap-2 align-items-end">
-                                <input type="hidden" name="orderId" value="@Model.Id" />
-                                <div class="flex-grow-1">
-                                    <label for="status" class="form-label">Nouveau statut</label>
-                                    <select name="status" class="form-select">
-                                        @foreach (var status in ViewBag.OrderStatuses)
-                                        {
-                                            @if (status.Value != (int)OrderStatus.Cancelled)
-                                            {
-                                                <option value="@status.Value" selected="@(status.Value == (int)Model.Status)">@status.Text</option>
-                                            }
-                                        }
-                                    </select>
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <form method="post" asp-action="UpdateStatus" class="d-flex gap-2 align-items-end">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="orderId" value="@Model.Id" />
+                                        <div class="flex-grow-1">
+                                            <label for="status" class="form-label">
+                                                <i class="fas fa-exchange-alt me-1"></i>Changer le statut
+                                            </label>
+                                            <select name="status" class="form-select">
+                                                <option value="">-- Sélectionner un nouveau statut --</option>
+                                                @foreach (var status in ViewBag.OrderStatuses)
+                                                {
+                                                    var statusEnum = (OrderStatus)status.Value;
+                                                    var isSelected = status.Value == (int)Model.Status;
+                                                    var isDisabled = isSelected; // Désactiver le statut actuel
+
+                                                    <option value="@status.Value"
+                                                            selected="@isSelected"
+                                                            disabled="@isDisabled"
+                                                            class="@(isSelected ? "text-muted" : "")">
+                                                        @if (isSelected)
+                                                        {
+                                                            <text>✓ </text>
+                                                        }
+                                                        @status.Text @(isSelected ? " (Actuel)" : "")
+                                                    </option>
+                                                }
+                                            </select>
+                                            <small class="form-text text-muted">
+                                                Statut actuel : <order-status status="@Model.Status"></order-status>
+                                            </small>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save me-2"></i>Mettre à jour
+                                        </button>
+                                    </form>
                                 </div>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-save me-2"></i>Mettre à jour
-                                </button>
-                            </form>
+                                <div class="col-md-4">
+                                    <div class="alert alert-info mb-0">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        <strong>Actions disponibles :</strong>
+                                        <ul class="mb-0 mt-2">
+                                            <li>Processing : Commande en préparation</li>
+                                            <li>Shipped : Commande expédiée</li>
+                                            <li>Delivered : Commande livrée</li>
+                                            <li>Cancelled : Annuler et rembourser</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @* Actions rapides pour Admin/Librarian *@
+                            @if (Model.Status != OrderStatus.Cancelled && Model.Status != OrderStatus.Delivered)
+                            {
+                                <hr />
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <strong>Actions rapides :</strong>
+
+                                    @if (Model.Status == OrderStatus.Pending)
+                                    {
+                                        <form method="post" asp-action="UpdateStatus" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="orderId" value="@Model.Id" />
+                                            <input type="hidden" name="status" value="@((int)OrderStatus.Processing)" />
+                                            <button type="submit" class="btn btn-sm btn-info">
+                                                <i class="fas fa-cog me-1"></i>Marquer en traitement
+                                            </button>
+                                        </form>
+                                    }
+
+                                    @if (Model.Status == OrderStatus.Processing)
+                                    {
+                                        <form method="post" asp-action="UpdateStatus" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="orderId" value="@Model.Id" />
+                                            <input type="hidden" name="status" value="@((int)OrderStatus.Shipped)" />
+                                            <button type="submit" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-shipping-fast me-1"></i>Marquer expédiée
+                                            </button>
+                                        </form>
+                                    }
+
+                                    @if (Model.Status == OrderStatus.Shipped)
+                                    {
+                                        <form method="post" asp-action="UpdateStatus" class="d-inline">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="orderId" value="@Model.Id" />
+                                            <input type="hidden" name="status" value="@((int)OrderStatus.Delivered)" />
+                                            <button type="submit" class="btn btn-sm btn-success">
+                                                <i class="fas fa-check-circle me-1"></i>Marquer livrée
+                                            </button>
+                                        </form>
+                                    }
+
+                                    @* Bouton d'annulation pour Admin/Librarian *@
+                                    <form method="post" asp-action="Cancel" asp-route-id="@Model.Id" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                onclick="return confirm('Êtes-vous sûr de vouloir annuler cette commande ? Cette action remboursera automatiquement les crédits.')">
+                                            <i class="fas fa-ban me-1"></i>Annuler la commande
+                                        </button>
+                                    </form>
+                                </div>
+                            }
                         </div>
                     </div>
                 }

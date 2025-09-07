@@ -22,6 +22,7 @@ namespace ECommerceApp.Controllers
         }
 
         // GET: Authors
+        // GET: Authors
         public async Task<IActionResult> Index(string searchTerm = "")
         {
             List<Author> authors;
@@ -36,6 +37,15 @@ namespace ECommerceApp.Controllers
                 authors = await _authorService.GetAllAuthorsAsync();
             }
 
+            // AJOUT : Créer un dictionnaire avec le nombre de livres par auteur
+            var bookCounts = new Dictionary<int, int>();
+            foreach (var author in authors)
+            {
+                var books = await _bookService.GetBooksByAuthorAsync(author.Id);
+                bookCounts[author.Id] = books.Count;
+            }
+
+            ViewBag.BookCounts = bookCounts;
             ViewBag.CanManageAuthors = _authService.HasRole(UserRole.Librarian);
 
             return View(authors);

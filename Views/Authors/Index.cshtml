@@ -75,7 +75,12 @@
                             <div class="d-flex justify-content-between align-items-center">
                                 <small class="text-muted">
                                     <i class="fas fa-book me-1"></i>
-                                    @author.Books.Count livre(s)
+                                    @{
+                                        var bookCount = ViewBag.BookCounts != null && ((Dictionary<int, int>)ViewBag.BookCounts).ContainsKey(author.Id)
+                                        ? ((Dictionary<int, int>)ViewBag.BookCounts)[author.Id]
+                                        : 0;
+                                    }
+                                    @bookCount livre(s)
                                 </small>
                                 <div class="btn-group btn-group-sm">
                                     <a asp-action="Details" asp-route-id="@author.Id" class="btn btn-outline-primary">

@@ -99,6 +99,24 @@ namespace ECommerceApp.Services
             var order = _orders.FirstOrDefault(o => o.Id == orderId);
             if (order == null) return false;
 
+            // Si le nouveau statut est Cancelled, utiliser CancelOrderAsync pour la logique complète
+            if (status == OrderStatus.Cancelled)
+            {
+                return await CancelOrderAsync(orderId);
+            }
+
+            // Vérification des transitions valides
+            if (order.Status == OrderStatus.Cancelled)
+            {
+                return false; // Une commande annulée ne peut pas changer de statut
+            }
+
+            if (order.Status == OrderStatus.Delivered && status != OrderStatus.Delivered)
+            {
+                return false; // Une commande livrée ne peut pas revenir en arrière
+            }
+
+            // Mettre à jour le statut
             order.Status = status;
             return await Task.FromResult(true);
         }
@@ -108,6 +126,13 @@ namespace ECommerceApp.Services
             var order = _orders.FirstOrDefault(o => o.Id == orderId);
             if (order == null) return false;
 
+            // Vérifier si la commande peut être annulée
+            if (order.Status == OrderStatus.Cancelled || order.Status == OrderStatus.Delivered)
+            {
+                return false; // Ne peut pas annuler une commande déjà annulée ou livrée
+            }
+
+            // Changer le statut
             order.Status = OrderStatus.Cancelled;
 
             // Rembourser les crédits
@@ -125,7 +150,6 @@ namespace ECommerceApp.Services
 
             return true;
         }
-
         public async Task<List<Order>> GetOrdersByStatusAsync(OrderStatus status)
         {
             return await Task.FromResult(_orders.Where(o => o.Status == status).ToList());

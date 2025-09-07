@@ -2,6 +2,7 @@
 using ECommerceApp.Services;
 using ECommerceApp.Models.ViewModels;
 using ECommerceApp.Models.Enums;
+using System.Linq;
 
 namespace ECommerceApp.Controllers
 {
@@ -88,10 +89,11 @@ namespace ECommerceApp.Controllers
                 return RedirectToAction("AccessDenied", "Account");
             }
 
+            // AMÉLIORATION : Protection complète contre la modification de son propre rôle
             var currentUser = await _authService.GetCurrentUserAsync();
-            if (currentUser != null && currentUser.Id == userId && role != UserRole.Admin)
+            if (currentUser != null && currentUser.Id == userId)
             {
-                TempData["ErrorMessage"] = "Vous ne pouvez pas modifier votre propre rôle d'administrateur.";
+                TempData["ErrorMessage"] = "Vous ne pouvez pas modifier votre propre rôle.";
                 return RedirectToAction("Users");
             }
 
@@ -108,33 +110,53 @@ namespace ECommerceApp.Controllers
             return RedirectToAction("Users");
         }
 
-        // POST: Admin/UpdateUserCredits
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateUserCredits(int userId, decimal credits)
+        // GET: Admin/Statistics
+        public async Task<IActionResult> Statistics()
         {
             if (!_authService.HasRole(UserRole.Admin))
             {
                 return RedirectToAction("AccessDenied", "Account");
             }
 
-            if (credits < 0)
+            var model = new DashboardViewModel
             {
-                TempData["ErrorMessage"] = "Les crédits ne peuvent pas être négatifs.";
-                return RedirectToAction("Users");
+                TotalUsers = await _userService.GetTotalUsersCountAsync(),
+                TotalBooks = await _bookService.GetTotalBooksCountAsync(),
+                TotalOrders = await _orderService.GetTotalOrdersCountAsync(),
+                TotalRevenue = await _orderService.GetTotalRevenueAsync(),
+                TodayOrders = await _orderService.GetTodayOrdersCountAsync(),
+                TodayRevenue = await _orderService.GetTodayRevenueAsync(),
+                PendingLibrarianRequests = await _librarianRequestService.GetPendingRequestsCountAsync(),
+                TopSellingBooks = await _bookService.GetTopSellingBooksAsync(10),
+                RecentOrders = await _orderService.GetRecentOrdersAsync(10),
+                RecentUsers = await _userService.GetRecentUsersAsync(10)
+            };
+
+            // AJOUT : Préparer les données pour ViewBag
+            var allUsers = await _userService.GetAllUsersAsync();
+            var usersByRole = allUsers.GroupBy(u => u.Role).ToDictionary(g => (int)g.Key, g => g.Count());
+            ViewBag.UsersByRole = usersByRole;
+
+            // CORRECTION : Préparer TOUS les statuts de commande (même à 0)
+            var allOrders = await _orderService.GetAllOrdersAsync();
+            var ordersByStatus = new Dictionary<int, int>();
+
+            // Initialiser tous les statuts à 0
+            foreach (OrderStatus status in Enum.GetValues<OrderStatus>())
+            {
+                ordersByStatus[(int)status] = 0;
             }
 
-            var success = await _userService.UpdateUserCreditsAsync(userId, credits);
-            if (success)
+            // Compter les commandes existantes
+            var existingOrderCounts = allOrders.GroupBy(o => o.Status).ToDictionary(g => (int)g.Key, g => g.Count());
+            foreach (var kvp in existingOrderCounts)
             {
-                TempData["SuccessMessage"] = $"Crédits utilisateur mis à jour avec succès : {credits:C}";
-            }
-            else
-            {
-                TempData["ErrorMessage"] = "Erreur lors de la mise à jour des crédits.";
+                ordersByStatus[kvp.Key] = kvp.Value;
             }
 
-            return RedirectToAction("Users");
+            ViewBag.OrdersByStatus = ordersByStatus;
+
+            return View(model);
         }
 
         // POST: Admin/DeactivateUser
