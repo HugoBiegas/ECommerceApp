@@ -1,5 +1,33 @@
 ﻿# 📚 BookStore - Application E-Commerce ASP.NET Core MVC
 
+<!-- Badges du projet -->
+![ASP.NET Core](https://img.shields.io/badge/ASP.NET%20Core-8.0-blue?style=for-the-badge&logo=dotnet)
+![C#](https://img.shields.io/badge/C%23-12.0-purple?style=for-the-badge&logo=csharp)
+![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-blueviolet?style=for-the-badge&logo=bootstrap)
+![License](https://img.shields.io/badge/License-Academic-green?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Completed-success?style=for-the-badge)
+
+<!-- Badges académiques -->
+![ESTIAM](https://img.shields.io/badge/ESTIAM-2025-orange?style=flat-square&logo=graduation-cap)
+![Course](https://img.shields.io/badge/Course-Retail%20E--commerce-lightblue?style=flat-square)
+![Professor](https://img.shields.io/badge/Professor-Marcel%20Stefan%20Wagner%2C%20PhD-gold?style=flat-square)
+
+---
+
+## 📊 **RAPPORT DE PROJET**
+
+> **📑 [Consultez le rapport complet en PDF](./Rapport_BookStore_ESTIAM.pdf)**
+> 
+> Le rapport détaillé contient :
+> - 📸 **Captures d'écran** de toutes les fonctionnalités
+> - 🔧 **Explications techniques** détaillées
+> - 🏗️ **Architecture SOLID** implémentée
+> - 🎨 **Tag Helpers personnalisés** (7 développés)
+> - 👥 **Système de rôles** et sécurité
+> - 🧪 **Tests et validation** complets
+
+---
+
 ## 🎓 **Contexte Académique**
 Projet développé dans le cadre du cours **"Retail (e-commerce)"** dispensé par **Prof. Marcel Stefan Wagner, PhD** à l'**ESTIAM**.
 
