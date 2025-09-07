@@ -57,6 +57,19 @@
                                     </a>
                                     <ul class="dropdown-menu">
                                         <li>
+                                            <a class="dropdown-item" asp-controller="Admin" asp-action="Users" asp-role="@UserRole.Admin">
+                                                <i class="fas fa-users me-2"></i>Agent
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Admin" asp-action="Statistics" asp-role="@UserRole.Admin">
+                                                <i class="fas fa-dashboard me-2"></i>Statistiques
+                                            </a>
+                                        </li>
+
+										<li asp-role="@UserRole.Admin"><hr class="dropdown-divider"></li>
+
+                                        <li>
                                             <a class="dropdown-item" asp-controller="Authors" asp-action="Index">
                                                 <i class="fas fa-users me-2"></i>Auteurs
                                             </a>
@@ -71,7 +84,9 @@
                                                 <i class="fas fa-shopping-bag me-2"></i>Commandes
                                             </a>
                                         </li>
+
                                         <li><hr class="dropdown-divider"></li>
+
                                         <li>
                                             <a class="dropdown-item" asp-controller="Authors" asp-action="Create">
                                                 <i class="fas fa-user-plus me-2"></i>Ajouter un auteur
