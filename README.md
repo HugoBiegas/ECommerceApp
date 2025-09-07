@@ -4,8 +4,6 @@
 ![ASP.NET Core](https://img.shields.io/badge/ASP.NET%20Core-8.0-blue?style=for-the-badge&logo=dotnet)
 ![C#](https://img.shields.io/badge/C%23-12.0-purple?style=for-the-badge&logo=csharp)
 ![Bootstrap](https://img.shields.io/badge/Bootstrap-5.3-blueviolet?style=for-the-badge&logo=bootstrap)
-![License](https://img.shields.io/badge/License-Academic-green?style=for-the-badge)
-![Status](https://img.shields.io/badge/Status-Completed-success?style=for-the-badge)
 
 <!-- Badges académiques -->
 ![ESTIAM](https://img.shields.io/badge/ESTIAM-2025-orange?style=flat-square&logo=graduation-cap)
@@ -565,4 +563,4 @@ dotnet run
 - **Documentation** : XML Documentation obligatoire
 
 ---
-*Développé avec ❤️ par l'équipe ESTIAM sous la supervision de Prof. Marcel Stefan Wagner, PhD - Septembre 2025*
+*Développé avec ❤️ par notre équipe sous la supervision de Prof. Marcel Stefan Wagner, PhD - Septembre 2025*
